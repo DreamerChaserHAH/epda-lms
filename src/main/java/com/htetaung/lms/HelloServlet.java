@@ -1,6 +1,7 @@
 package com.htetaung.lms;
 
 import java.io.*;
+
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
@@ -19,6 +20,7 @@ public class HelloServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         out.println("<html><body>");
         out.println("<h1>" + message + "</h1>");
+        out.println("<p>" + "</p>");
         out.println("</body></html>");
     }
 
