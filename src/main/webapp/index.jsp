@@ -234,20 +234,14 @@
                             </div>
                         </div>
                     </div>
+
                 <%
                 } else {
                 %>
-                    <!-- Placeholder for other pages -->
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-gray-800 capitalize"><%= currentPage %></h1>
-                        <p class="text-gray-600 mt-2">Content for <%= currentPage %> page will be displayed here</p>
-                    </div>
+                <jsp:include page="settings.jsp">
+                    <jsp:param name="username" value="<%= username %>"/>
+                </jsp:include>
 
-                    <div class="card bg-white shadow-lg">
-                        <div class="card-body">
-                            <p class="text-gray-600">This section is under development.</p>
-                        </div>
-                    </div>
                 <%
                 }
                 %>

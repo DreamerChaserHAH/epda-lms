@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="JBoss/WildFly 38.0.0.Final" type="JBossConfiguration" factoryName="Local" APPLICATION_SERVER_NAME="JBoss/WildFly 38.0.0.Final" ALTERNATIVE_JRE_ENABLED="false">
+  <configuration default="false" name="JBoss/WildFly 38.0.0.Final" type="JBossConfiguration" factoryName="Local" APPLICATION_SERVER_NAME="JBoss/WildFly 38.0.0.Final" ALTERNATIVE_JRE_ENABLED="true" ALTERNATIVE_JRE_PATH="$APPLICATION_HOME_DIR$/jbr">
     <deployment>
       <artifact name="lms:war exploded">
         <settings />
@@ -9,7 +9,7 @@
       <option name="BINDING_SET_NAME" value="" />
       <option name="SERVER" />
       <option name="DOMAIN" value="false" />
-      <option name="SERVER_GROUP" value="main-server-group" />
+      <option name="SERVER_GROUP" />
       <option name="USERNAME" value="" />
       <option name="CREDENTIAL_ALIAS" />
     </server-settings>

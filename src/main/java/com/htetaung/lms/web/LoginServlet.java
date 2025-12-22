@@ -1,6 +1,9 @@
 package com.htetaung.lms.web;
 
 import com.htetaung.lms.entity.User;
+import com.htetaung.lms.exception.AuthenticationException;
+import com.htetaung.lms.service.AuthenticationService;
+import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,15 +18,8 @@ import java.util.Map;
 @WebServlet(name = "loginServlet", urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
 
-    // Demo credentials storage (in a real application, use a database)
-    private static final Map<String, UserCredential> DEMO_USERS = new HashMap<>();
-
-    static {
-        DEMO_USERS.put("admin", new UserCredential("admin", "admin123", User.Role.ADMIN));
-        DEMO_USERS.put("leader", new UserCredential("leader", "leader123", User.Role.LEADER));
-        DEMO_USERS.put("lecturer", new UserCredential("lecturer", "lecturer123", User.Role.LECTURER));
-        DEMO_USERS.put("student", new UserCredential("student", "student123", User.Role.STUDENT));
-    }
+    @EJB
+    private AuthenticationService authService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,56 +46,39 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+        User.Role selectedRole;
         try {
-            User.Role selectedRole = User.Role.valueOf(roleParam);
-
-            // Authenticate user
-            UserCredential userCred = DEMO_USERS.get(username.toLowerCase());
-
-            if (userCred != null && userCred.password.equals(password) &&
-                userCred.role == selectedRole) {
-
-                // Authentication successful
-                HttpSession session = request.getSession(true);
-                session.setAttribute("username", username);
-                session.setAttribute("role", selectedRole);
-                session.setAttribute("authenticated", true);
-
-                // Redirect to appropriate dashboard based on role
-                String redirectUrl = getDashboardUrl(selectedRole);
-                response.sendRedirect(request.getContextPath());
-
-            } else {
-                // Authentication failed
-                request.setAttribute("error", "Invalid username, password, or role");
-                request.getRequestDispatcher("/login.jsp").forward(request, response);
-            }
-
+            selectedRole = User.Role.valueOf(roleParam);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", "Invalid role selected");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
         }
-    }
 
-    private String getDashboardUrl(User.Role role) {
-        return switch (role) {
-            case ADMIN -> "/admin/dashboard";
-            case LEADER -> "/leader/dashboard";
-            case LECTURER -> "/lecturer/dashboard";
-            case STUDENT -> "/student/dashboard";
-        };
-    }
+        try {
+            // Authenticate user
+            User user = authService.login(username, password, selectedRole);
 
-    // Inner class to store demo credentials
-    private static class UserCredential {
-        String username;
-        String password;
-        User.Role role;
+            HttpSession session = request.getSession(true);
+            session.setAttribute("username", user.getUsername());
+            session.setAttribute("role", user.getRole());
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("authenticated", true);
 
-        UserCredential(String username, String password, User.Role role) {
-            this.username = username;
-            this.password = password;
-            this.role = role;
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+
+        } catch (AuthenticationException e) {
+            // Handle authentication failures (username not found, wrong password, wrong role)
+            request.setAttribute("error", e.getMessage());
+            request.setAttribute("username", username);
+            request.setAttribute("role", roleParam);
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Handle unexpected exceptions
+            request.setAttribute("error", "An unexpected error occurred during login");
+            request.setAttribute("username", username);
+            request.setAttribute("role", roleParam);
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }
 }
