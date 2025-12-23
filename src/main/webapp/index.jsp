@@ -151,7 +151,7 @@
             <p class="text-lg text-gray-500 pr-6 pt-4 pb-4">Welcome back, <%= username %>!</p>
 
             <c:set var="role" value="<%= role.toLowerCase() %>"/>
-            <c:set var="pageToInclude" value="/components/${role}/${
+            <c:set var="pageToInclude" value="/WEB-INF/components/${role}/${
                  param.page != null ? param.page : 'dashboard'
             }.jsp"/>
             <jsp:include page="${pageToInclude}">

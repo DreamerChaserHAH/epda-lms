@@ -22,6 +22,6 @@
     String role = session.getAttribute("role") != null ?
             session.getAttribute("role").toString() : "STUDENT";
 %>
-<jsp:include page="${pageContext.request.contextPath}/components/profile.jsp">
+<jsp:include page="../profile.jsp">
     <jsp:param name="username" value="<%= username %>"/>
 </jsp:include>
