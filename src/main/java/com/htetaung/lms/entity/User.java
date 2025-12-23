@@ -4,51 +4,61 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.Optional;
 
 @Entity
-@Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "User")
 public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name="user_id")
+    private Long userId;
 
     @NotNull
     @Column(unique = true, nullable = false)
     private String username;
 
-    @NotNull
-    @Column(nullable = false)
-    private String password;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(unique = true)
-    private String email;
+    @NotNull
+    @Column(nullable = false)
+    private String passwordHash;
 
-    // Constructors
-    public User() {
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "created_by_id", nullable = true, updatable = false)
+    private User createdBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Date createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
+    public User(){
+
     }
 
-    public User(String username, String password, Role role) {
+    public User(String username, String full_name, String passwordHash, Optional<User> createdBy, Role role) {
         this.username = username;
-        this.password = password;
+        this.fullName = full_name;
+        this.passwordHash = passwordHash;
+        this.createdBy = createdBy != null ? createdBy.orElse(null) : null;
         this.role = role;
     }
 
     // Getters and Setters
     public Long getId() {
-        return id;
+        return userId;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.userId = id;
     }
 
     public String getUsername() {
@@ -59,20 +69,12 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
+    public void setPasswordHash(String password) {
+        this.passwordHash = password;
     }
 
     public String getFullName() {
@@ -83,12 +85,29 @@ public class User implements Serializable {
         this.fullName = fullName;
     }
 
-    public String getEmail() {
-        return email;
+    public User getCreatedBy() {
+        return createdBy;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public enum Role {
@@ -104,4 +123,3 @@ public class User implements Serializable {
         };
     }
 }
-

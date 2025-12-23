@@ -1,8 +1,8 @@
-package com.htetaung.lms.web;
+package com.htetaung.lms.servlets;
 
+import com.htetaung.lms.ejb.UserFacade;
 import com.htetaung.lms.entity.User;
 import com.htetaung.lms.exception.AuthenticationException;
-import com.htetaung.lms.service.AuthenticationService;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,14 +12,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @WebServlet(name = "loginServlet", urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
 
     @EJB
-    private AuthenticationService authService;
+    private UserFacade userFacade;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -57,7 +55,7 @@ public class LoginServlet extends HttpServlet {
 
         try {
             // Authenticate user
-            User user = authService.login(username, password, selectedRole);
+            User user = userFacade.authenticateUser(username, password, selectedRole);
 
             HttpSession session = request.getSession(true);
             session.setAttribute("username", user.getUsername());
