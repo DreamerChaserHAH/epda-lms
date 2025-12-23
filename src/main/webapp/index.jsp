@@ -29,19 +29,28 @@
     switch (role) {
         case "ADMIN":
             //availablePages = new String[]{ "Users", "Modules", "Classes", "Grading Reports"};
-            availablePages = new Page[]{};
+            availablePages = new Page[]{
+                    new Page("Users", "users", "users.png"),
+                    new Page("Modules", "modules", "books.png"),
+                    new Page("Classes", "classes", "classes.png"),
+                    new Page("Grading Reports", "grading_reports", "reports.png")
+            };
             break;
         case "AcademicLeader":
-            //availablePages = new String[]{ "Profile", "Modules", "Assign Lecturers"};
-            availablePages = new Page[]{};
+            //availablePages = new String[]{ "Modules", "Assign Lecturers"};
+            availablePages = new Page[]{
+                    new Page("Modules", "modules", "books.png"),
+                    new Page("Assign Lecturers", "assign_lecturers", "assign.png")
+            };
             break;
         case "Lecturer":
-            //availablePages = new String[]{ "Profile", "Modules"};
-            availablePages = new Page[]{};
+            //availablePages = new String[]{ "Modules"};
+            availablePages = new Page[]{
+                    new Page("Modules", "modules", "books.png"),
+            };
             break;
         case "STUDENT":
             availablePages = new Page[] {
-                    new Page("Profile", "profile", "profile.png"),
                     new Page("My Results", "my_results", "results.png"),
                     new Page("Calendar", "calendar", "calendar.png"),
                     new Page("Assignments", "assignments", "upload.png")
@@ -101,6 +110,11 @@
                 <a href="?page=dashboard" class="menu-item <%= currentPage.equals("dashboard") ? "active" : "" %>">
                     <img src="${pageContext.request.contextPath}/images/icons/dashboard.png" alt="Dashboard" class="menu-icon">
                     <span>Dashboard</span>
+                </a>
+
+                <a href="?page=profile" class="menu-item <%= currentPage.equals("profile") ? "active" : "" %>">
+                    <img src="${pageContext.request.contextPath}/images/icons/profile.png" alt="Profile" class="menu-icon">
+                    <span>Profile</span>
                 </a>
 
                 <% for(Page availablePage : availablePages) { %>
