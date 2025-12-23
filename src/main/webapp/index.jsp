@@ -53,7 +53,7 @@
                     new Page("Modules", "modules", "books.png"),
             };
             break;
-        case "STUDENT":
+        case "Student":
             availablePages = new Page[] {
                     new Page("My Results", "my_results", "results.png"),
                     new Page("Calendar", "calendar", "calendar.png"),
@@ -75,6 +75,7 @@
     <link rel="icon" type="image/jpg" href="${pageContext.request.contextPath}/images/logos/logo_apu.jpg"/>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="module" src="https://unpkg.com/cally"></script>
     <style>
         .menu-item {
             display: flex;
