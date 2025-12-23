@@ -92,15 +92,15 @@ public class User implements Serializable {
     }
 
     public enum Role {
-        STUDENT, LECTURER, LEADER, ADMIN
+        STUDENT, LECTURER, ACADEMIC_LEADER, ADMIN
     }
 
     public static String roleToString(Role role) {
         return switch (role) {
-            case STUDENT -> "student";
-            case LECTURER -> "lecturer";
-            case LEADER -> "leader";
-            case ADMIN -> "admin";
+            case STUDENT -> "Student";
+            case LECTURER -> "Lecturer";
+            case ACADEMIC_LEADER -> "Academic Leader";
+            case ADMIN -> "Admin";
         };
     }
 }

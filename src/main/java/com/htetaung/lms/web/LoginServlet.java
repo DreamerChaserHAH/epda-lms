@@ -65,7 +65,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userId", user.getId());
             session.setAttribute("authenticated", true);
 
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
 
         } catch (AuthenticationException e) {
             // Handle authentication failures (username not found, wrong password, wrong role)
