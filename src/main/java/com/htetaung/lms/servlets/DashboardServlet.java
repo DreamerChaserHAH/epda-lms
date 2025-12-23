@@ -1,4 +1,4 @@
-package com.htetaung.lms.web;
+package com.htetaung.lms.servlets;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

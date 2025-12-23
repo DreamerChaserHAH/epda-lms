@@ -1,12 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="javax.naming.InitialContext" %>
-<%@ page import="com.htetaung.lms.service.UserService" %>
 <%@ page import="com.htetaung.lms.entity.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="javax.naming.NamingException" %>
 <%@ page import="jakarta.ejb.EJB" %>
 
 <%
+    /*
     // Look up the EJB
     InitialContext ctx = new InitialContext();
     UserService userService = null;
@@ -14,10 +14,10 @@
         userService = (UserService) ctx.lookup("java:global/lms/UserService");
     } catch (NamingException e) {
         throw new RuntimeException(e);
-    }
+    }*/
 
     // Get all users
-    List<User> users = userService.findAll();
+    List<User> users;
     // Get parameters passed from parent
     String username = request.getParameter("username");
 %>
