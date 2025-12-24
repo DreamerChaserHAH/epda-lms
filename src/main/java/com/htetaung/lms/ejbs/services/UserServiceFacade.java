@@ -165,6 +165,22 @@ public class UserServiceFacade {
                 .toList();
     }
 
+    public void UpdateUser(Long userId, String username, String fullName, UserRole role, String operatorUsername) throws IllegalArgumentException{
+        User userToUpdate = userFacade.find(userId);
+
+        if(!userToUpdate.getUsername().equals(username)){
+            if(!userFacade.isUsernameAvailable(username)){
+                throw new IllegalArgumentException("Username already exists");
+            }
+            userToUpdate.setUsername(username);
+        }
+
+        userToUpdate.setFullName(fullName);
+        userToUpdate.setRole(role);
+
+        userFacade.edit(userToUpdate, operatorUsername);
+    }
+
     private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

@@ -2,6 +2,7 @@ package com.htetaung.lms.servlets;
 
 import com.htetaung.lms.ejbs.services.UserServiceFacade;
 import com.htetaung.lms.models.dto.UserDTO;
+import com.htetaung.lms.models.enums.UserRole;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -63,6 +64,26 @@ public class UserManagementServlet extends HttpServlet {
         }
         request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
                 .include(request, response);
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            Long userId = Long.parseLong(request.getParameter("userId"));
+            String username = request.getParameter("username");
+            String fullName = request.getParameter("fullName");
+            String role = request.getParameter("role");
+
+            UserRole userRole = UserRole.valueOf(role.toUpperCase());
+
+            // Update user via service facade
+            userServiceFacade.UpdateUser(userId, username, fullName, userRole, "");
+
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid user data");
+        }
     }
 
     @Override
