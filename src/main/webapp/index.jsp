@@ -32,7 +32,7 @@
 
     Page[] availablePages;
     switch (role) {
-        case "ADMIN":
+        case "Admin":
             //availablePages = new String[]{ "Users", "Modules", "Classes", "Grading Reports"};
             availablePages = new Page[]{
                     new Page("Users", "users", "users.png"),

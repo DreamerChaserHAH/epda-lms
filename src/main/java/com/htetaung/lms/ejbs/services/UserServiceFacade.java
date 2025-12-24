@@ -49,7 +49,7 @@ public class UserServiceFacade {
         newUser.setPasswordHash(hashedPassword);
         newUser.setFullName(fullname);
         newUser.setCreatedBy(null);
-        newUser.setRole(UserRole.STUDENT);
+        newUser.setRole(role);
 
         switch (role){
             case STUDENT -> {
@@ -96,7 +96,6 @@ public class UserServiceFacade {
 
         return user;
     }
-
 
     private String hashPassword(String password) {
         try {

@@ -23,7 +23,7 @@
             <fieldset class="fieldset bg-base-100 border-base-300 rounded-box w-64 border p-4">
                 <legend class="fieldset-legend">Appearance</legend>
                 <label class="label">
-                    <input type="checkbox" checked class="toggle" />
+                    <input type="checkbox" checked class="toggle theme-controller" />
                     Dark Mode
                 </label>
             </fieldset>
