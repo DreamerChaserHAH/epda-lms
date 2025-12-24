@@ -62,6 +62,15 @@ public class UserFacade extends AbstractFacade<User>{
         return query.getResultList();
     }
 
+    public List<User> searchByUsername(String username, int page) {
+        TypedQuery<User> query = em.createQuery(
+                "SELECT u FROM User u WHERE LOWER(u.username) LIKE :username ORDER BY u.username ASC", User.class);
+        query.setParameter("username", "%" + username.toLowerCase() + "%");
+        query.setFirstResult((page - 1) * PAGE_SIZE);
+        query.setMaxResults(PAGE_SIZE);
+        return query.getResultList();
+    }
+
     public List<User> findAllUsers(int page) {
         TypedQuery<User> query = em.createQuery(
                 "SELECT u FROM User u ORDER BY u.fullName ASC", User.class);

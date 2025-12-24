@@ -9,6 +9,9 @@
 <%@ page import="com.htetaung.lms.models.dto.UserDTO" %>
 <%@ page import="java.util.List" %>
 <%
+    String searchQuery = request.getParameter("searchQuery") != null ? request.getParameter("searchQuery") : "";
+    String filterField = request.getParameter("filterField") != null ? request.getParameter("filterField") : "fullName";
+
     List<UserDTO> users = (List<UserDTO>) request.getAttribute("users");
     Integer currentPage = (Integer) request.getAttribute("currentPage");
     String contextPath = request.getParameter("contextPath").toString();
@@ -25,16 +28,32 @@
         </button>
     </div>
     <p class="text-lg text-gray-500 pr-6 pt-2">Manage all system users</p>
-    <div class="flex gap-2 w-full pt-2">
+    <form method="GET" action="<%= request.getContextPath() %>/index.jsp" class="flex gap-2 w-full pt-2">
+        <input type="hidden" name="pagination" value="1" />
+        <input type="hidden" name="page" value="users" />
+
         <label class="input flex-1">
             <img src="<%= request.getContextPath()%>/images/icons/assign.png" alt="Search Icon" class="mr-2 w-5 h-5 object-contain" />
-            <input type="text" class="grow" placeholder="Search users..." />
+            <input type="text"
+                   name="searchQuery"
+                   class="grow"
+                   placeholder="Search users..."
+                   value="<%= request.getParameter("searchQuery") != null ? request.getParameter("searchQuery") : "" %>" />
         </label>
-        <select class="select select-bordered w-40">
-            <option value="fullname" selected>Full Name</option>
-            <option value="username">Username</option>
+
+        <select name="filterField" class="select select-bordered w-40">
+            <option value="fullName" <%= "fullName".equals(request.getParameter("filterField")) || request.getParameter("filterField") == null ? "selected" : "" %>>Full Name</option>
+            <option value="username" <%= "username".equals(request.getParameter("filterField")) ? "selected" : "" %>>Username</option>
+            <option value="role" <%= "role".equals(request.getParameter("filterField")) ? "selected" : "" %>>Role</option>
         </select>
-    </div>
+
+        <button type="submit" class="btn btn-primary">Search</button>
+
+        <% if (request.getParameter("searchQuery") != null && !request.getParameter("searchQuery").isEmpty()) { %>
+        <a href="<%= request.getContextPath() %>/users?pagination=1" class="btn btn-outline">Clear</a>
+        <% } %>
+    </form>
+
 
     <dialog id="user_registration_modal" class="modal">
         <div class="modal-box">
@@ -136,5 +155,12 @@
     </script>
 
 
-    <jsp:include page="/users?pagination=1" />
+    <% if(!searchQuery.isEmpty()){ %>
+        <jsp:include page="/users?pagination=1">
+            <jsp:param name="searchQuery" value="<%= searchQuery %>"/>
+            <jsp:param name="filterFiled" value="<%= filterField %>"/>
+        </jsp:include>
+    <% } else { %>
+        <jsp:include page="/users?pagination=1"/>
+    <% }  %>
 </div>

@@ -122,6 +122,49 @@ public class UserServiceFacade {
                 .toList();
     }
 
+    public List<UserDTO> searchUsersByFullName(String fullname, int page){
+        return userFacade.searchByFullName(fullname, page).stream()
+                .map(user -> new UserDTO(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getFullName(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    public List<UserDTO> searchUsersByUsername(String username, int page){
+        return userFacade.searchByUsername(username, page).stream()
+                .map(user -> new UserDTO(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getFullName(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    public List<UserDTO> searchUsersByRole(String role_string, int page){
+        UserRole role;
+        try{
+            role = UserRole.valueOf(role_string.toUpperCase());
+        }catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Invalid role for searching users");
+        }
+
+        return userFacade.findAllUsersWithRole(role, page).stream()
+                .map(user -> new UserDTO(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getFullName(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
+    }
+
     private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

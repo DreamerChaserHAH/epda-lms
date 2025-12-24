@@ -22,15 +22,45 @@ public class UserManagementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pagination_string = request.getParameter("pagination");
+        String search_query = request.getParameter("searchQuery");
+        String filter_field = request.getParameter("filterField");
+
         if (pagination_string == null || pagination_string.isEmpty()) {
             pagination_string = "1";
         }
         int pagination = Integer.parseInt(pagination_string);
 
-        List<UserDTO> users = userServiceFacade.getUsers(pagination);
-        request.setAttribute("users", users);
-        request.setAttribute("currentPage", pagination);
+        if (search_query == null || search_query.isEmpty()) {
+            List<UserDTO> users = userServiceFacade.getUsers(pagination);
+            request.setAttribute("users", users);
+            request.setAttribute("currentPage", pagination);
+        }else{
+            if(filter_field==null || filter_field.isEmpty()){
+                filter_field = "fullName";
+            }
 
+            if(filter_field == "username") {
+                List<UserDTO> users = userServiceFacade.searchUsersByUsername(search_query, pagination);
+                request.setAttribute("users", users);
+                request.setAttribute("currentPage", pagination);
+                request.setAttribute("searchQuery", search_query);
+                request.setAttribute("filterField", filter_field);
+            }
+            if(filter_field == "role"){
+                List<UserDTO> users = userServiceFacade.searchUsersByRole(search_query, pagination);
+                request.setAttribute("users", users);
+                request.setAttribute("currentPage", pagination);
+                request.setAttribute("searchQuery", search_query);
+                request.setAttribute("filterField", filter_field);
+            }
+            else{
+                List<UserDTO> users = userServiceFacade.searchUsersByFullName(search_query, pagination);
+                request.setAttribute("users", users);
+                request.setAttribute("currentPage", pagination);
+                request.setAttribute("searchQuery", search_query);
+                request.setAttribute("filterField", filter_field);
+            }
+        }
         request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
                 .include(request, response);
     }
