@@ -1,10 +1,17 @@
-package com.htetaung.lms.entity;
+package com.htetaung.lms.models;
+
+import com.htetaung.lms.models.enums.UserRole;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @PrimaryKeyJoinColumn(name="user_id")
 @Table(name="Student")
@@ -17,7 +24,9 @@ public class Student extends User {
     private Long programmeId;
 
     public Student(){
-
+        super();
+        this.studentId = UUID.randomUUID().toString();
+        this.setRole(UserRole.STUDENT);
     }
 
     public Student(String username, String full_name, String passwordHash, Optional<User> createdBy) {
@@ -26,10 +35,17 @@ public class Student extends User {
             full_name,
             passwordHash,
             createdBy,
-            Role.STUDENT
+            UserRole.STUDENT
         );
         this.studentId = UUID.randomUUID().toString();
         this.programmeId = 0L;
+    }
+
+    public Student(User user, Long programmeId){
+        super(user);
+        user.setRole(UserRole.STUDENT);
+        this.studentId = UUID.randomUUID().toString();
+        this.programmeId = programmeId;
     }
 
     public String getStudentID() {

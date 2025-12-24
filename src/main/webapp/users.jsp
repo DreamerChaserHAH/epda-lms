@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="javax.naming.InitialContext" %>
-<%@ page import="com.htetaung.lms.entity.User" %>
+<%@ page import="com.htetaung.lms.models.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="javax.naming.NamingException" %>
 <%@ page import="jakarta.ejb.EJB" %>

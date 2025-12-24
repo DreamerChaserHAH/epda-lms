@@ -1,10 +1,11 @@
-<%@ page import="com.htetaung.lms.entity.User" %>
+<%@ page import="com.htetaung.lms.models.User" %>
+<%@ page import="com.htetaung.lms.models.enums.UserRole" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     // Check if user is authenticated
     if (session.getAttribute("authenticated") != null) {
         if ((Boolean)session.getAttribute("authenticated")) {
-            User.Role role = (User.Role) session.getAttribute("role");
+            UserRole role = (UserRole) session.getAttribute("role");
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }

@@ -5,7 +5,7 @@
              version="3.2">
     <persistence-unit name="default" transaction-type="JTA">
         <jta-data-source>java:jboss/datasources/test</jta-data-source>
-        <class>com.htetaung.lms.entity.User</class>
+        <class>com.htetaung.lms.models.User</class>
         <properties>
             <!-- Hibernate Properties -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>

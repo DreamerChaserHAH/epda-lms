@@ -1,4 +1,5 @@
-<%@ page import="com.htetaung.lms.entity.User" %>
+<%@ page import="com.htetaung.lms.models.User" %>
+<%@ page import="com.htetaung.lms.models.enums.UserRole" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
@@ -11,9 +12,9 @@
     }
 
     String username = (String) session.getAttribute("username");
-    User.Role role_object = (User.Role) session.getAttribute("role");
+    UserRole role_object = (UserRole) session.getAttribute("role");
     String role = role_object != null ?
-                User.roleToString(role_object) : "student";
+                UserRole.roleToString(role_object) : "student";
     
     // Get current page for active menu highlighting
 

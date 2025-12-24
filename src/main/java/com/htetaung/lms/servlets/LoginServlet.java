@@ -1,8 +1,10 @@
 package com.htetaung.lms.servlets;
 
-import com.htetaung.lms.ejb.UserFacade;
-import com.htetaung.lms.entity.User;
+import com.htetaung.lms.ejbs.facades.UserFacade;
+import com.htetaung.lms.ejbs.services.UserServiceFacade;
+import com.htetaung.lms.models.User;
 import com.htetaung.lms.exception.AuthenticationException;
+import com.htetaung.lms.models.enums.UserRole;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +19,7 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
 
     @EJB
-    private UserFacade userFacade;
+    private UserServiceFacade userServiceFacade;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -44,9 +46,9 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        User.Role selectedRole;
+        UserRole selectedRole;
         try {
-            selectedRole = User.Role.valueOf(roleParam);
+            selectedRole = UserRole.valueOf(roleParam);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", "Invalid role selected");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
@@ -55,12 +57,12 @@ public class LoginServlet extends HttpServlet {
 
         try {
             // Authenticate user
-            User user = userFacade.authenticateUser(username, password, selectedRole);
+            User user = userServiceFacade.authenticateUser(username, password, selectedRole);
 
             HttpSession session = request.getSession(true);
             session.setAttribute("username", user.getUsername());
             session.setAttribute("role", user.getRole());
-            session.setAttribute("userId", user.getId());
+            session.setAttribute("userId", user.getUserId());
             session.setAttribute("authenticated", true);
 
             response.sendRedirect(request.getContextPath() + "/index.jsp");

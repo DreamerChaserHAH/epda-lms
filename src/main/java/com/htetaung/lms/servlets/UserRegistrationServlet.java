@@ -1,7 +1,8 @@
 package com.htetaung.lms.servlets;
 
-import com.htetaung.lms.ejb.*;
-import com.htetaung.lms.entity.User.Role;
+import com.htetaung.lms.ejbs.facades.*;
+import com.htetaung.lms.ejbs.services.UserServiceFacade;
+import com.htetaung.lms.models.enums.UserRole;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,25 +13,14 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebServlet(name = "registrationServlet", urlPatterns = {"/register"})
 public class UserRegistrationServlet extends HttpServlet {
 
     @EJB
-    private UserFacade userFacade;
-
-    @EJB
-    private StudentFacade studentFacade;
-
-    @EJB
-    private AcademicLeaderFacade academicLeaderFacade;
-
-    @EJB
-    private LecturerFacade lecturerFacade;
-
-    @EJB
-    private AdminFacade adminFacade;
+    public UserServiceFacade userServiceFacade;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -47,8 +37,7 @@ public class UserRegistrationServlet extends HttpServlet {
             String password = request.getParameter("password");
             String confirmPassword = request.getParameter("confirmPassword");
             String roleParam = request.getParameter("role");
-            String studentId = request.getParameter("studentId");
-            String staffNumber = request.getParameter("staffNumber");
+
             String programmeId = request.getParameter("programmeId");
             String departmentId = request.getParameter("departmentId");
 
@@ -69,70 +58,65 @@ public class UserRegistrationServlet extends HttpServlet {
                 return;
             }
 
-            Role role = Role.valueOf(roleParam);
-            String passwordHash = hashPassword(password);
-
-            // Register user based on role
-            switch (role) {
-                case STUDENT:
-                    if (programmeId == null || programmeId.trim().isEmpty()) {
-                        request.setAttribute("error", "Programme is required for students");
-                        doGet(request, response);
-                        return;
-                    }
-
-                    studentFacade.registerStudent(
-                            username,
-                            fullName,
-                            passwordHash,
-                            null
-                    );
-                    break;
-
-                case LECTURER:
+            UserRole role = UserRole.valueOf(roleParam);
+            HashMap<String, String> additionalInfo = new HashMap<String, String>();
+            switch (role){
+                case ADMIN -> {
+                    /// check department id
                     if (departmentId == null || departmentId.trim().isEmpty()) {
-                        request.setAttribute("error", "Department is required for lecturers");
+                        request.setAttribute("error", "Department is required for admin");
                         doGet(request, response);
                         return;
                     }
-                    lecturerFacade.registerLecturer(
-                            username,
-                            fullName,
-                            passwordHash,
-                            null
-                    );
-                    break;
-
-                case ACADEMIC_LEADER:
-                    if (departmentId == null || programmeId == null ||
-                            departmentId.trim().isEmpty() || programmeId.trim().isEmpty()) {
-                        request.setAttribute("error", "Department and Programme are required");
+                    additionalInfo.put("departmentId", departmentId);
+                }
+                case ACADEMIC_LEADER -> {
+                    if (departmentId == null || departmentId.trim().isEmpty()) {
+                        request.setAttribute("error", "Department is required for Academic Leader");
                         doGet(request, response);
                         return;
                     }
-                    academicLeaderFacade.registerAcademicLeader(
-                            username,
-                            fullName,
-                            passwordHash,
-                            null
-                    );
-                    break;
-
-                case ADMIN:
-                    adminFacade.registerAdmin(
-                            username,
-                            fullName,
-                            passwordHash,
-                            null,
-                            0L
-                    );
-                    break;
-
-                default:
-                    request.setAttribute("error", "Invalid role");
+                    if (programmeId == null || programmeId.trim().isEmpty()) {
+                        request.setAttribute("error", "Programme is required for Academic Leader");
+                        doGet(request, response);
+                        return;
+                    }
+                    additionalInfo.put("departmentId", departmentId);
+                    additionalInfo.put("programmeId", programmeId);
+                }
+                case LECTURER -> {
+                    /// check department id
+                    if (departmentId == null || departmentId.trim().isEmpty()) {
+                        request.setAttribute("error", "Department is required for Lecturer");
+                        doGet(request, response);
+                        return;
+                    }
+                    additionalInfo.put("departmentId", departmentId);
+                }
+                case STUDENT -> {
+                    ///  check programme id
+                    if (programmeId == null || programmeId.trim().isEmpty()) {
+                        request.setAttribute("error", "Programme is required for Student");
+                        doGet(request, response);
+                        return;
+                    }
+                    additionalInfo.put("programmeId", programmeId);
+                }
+                default -> {
+                    request.setAttribute("error", "Invalid role selected");
                     doGet(request, response);
                     return;
+                }
             }
+
+            userServiceFacade.CreateUser(
+                    username,
+                    fullName,
+                    password,
+                    role,
+                    additionalInfo,
+                    ""
+            );
 
             // Success - redirect to login
             response.sendRedirect(request.getContextPath() + "/login?registered=true");
@@ -143,17 +127,6 @@ public class UserRegistrationServlet extends HttpServlet {
         } catch (Exception e) {
             request.setAttribute("error", "Registration failed: " + e.getMessage());
             doGet(request, response);
-        }
-    }
-
-    // Security utility (stays in facade)
-    private String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Password hashing failed", e);
         }
     }
 }
