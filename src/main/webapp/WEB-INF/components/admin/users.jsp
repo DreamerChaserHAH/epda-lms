@@ -56,57 +56,118 @@
 
 
     <dialog id="user_registration_modal" class="modal">
-        <div class="modal-box">
+        <div class="modal-box max-w-4xl max-h-[90vh] overflow-y-auto">
             <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
             <b class="text-lg font-bold">User Registration Form</b>
             <p class="py-4 text-gray-500">Press ESC key or click on ✕ button to close</p>
-            <p><%=contextPath%></p>
-            <form method="post" action="<%= contextPath%>/register">
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Username</legend>
-                    <input type="text" name="username" class="input" placeholder="Type unique username of the user" required />
-                </fieldset>
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Full Name</legend>
-                    <input type="text" name="fullName" class="input" placeholder="Type the Full Name of the user" required />
-                </fieldset>
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Password</legend>
-                    <input type="password" name="password" class="input" placeholder="Type password" required />
-                </fieldset>
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Confirm Password</legend>
-                    <input type="password" name="confirmPassword" class="input" placeholder="Type Confirm Password" required />
-                </fieldset>
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Role</legend>
-                    <select id="roleSelect" name="role" class="select" required onchange="toggleRoleFields()">
-                        <option disabled selected value="">Select Role</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="ACADEMIC_LEADER">Academic Leader</option>
-                        <option value="LECTURER">Lecturer</option>
-                        <option value="STUDENT">Student</option>
-                    </select>
-                </fieldset>
 
-                <fieldset id="programmeIdField" class="fieldset hidden">
-                    <legend class="fieldset-legend">Programme ID</legend>
-                    <input type="number" name="programmeId" class="input" placeholder="Enter Programme ID" />
-                </fieldset>
+            <form method="post" action="<%= contextPath%>/register" class="space-y-6">
+                <!-- Personal Information Section -->
+                <div class="divider text-primary font-semibold">Personal Information</div>
 
-                <fieldset id="departmentIdField" class="fieldset hidden">
-                    <legend class="fieldset-legend">Department ID</legend>
-                    <input type="number" name="departmentId" class="input" placeholder="Enter Department ID" />
-                </fieldset>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Username *</legend>
+                        <input type="text" name="username" class="input input-bordered w-full" placeholder="Type unique username" required />
+                    </fieldset>
 
-                <div class="form-control mt-6">
-                    <button type="submit" class="btn btn-primary text-white">Register User</button>
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Full Name *</legend>
+                        <input type="text" name="fullName" class="input input-bordered w-full" placeholder="Type full name" required />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Date of Birth *</legend>
+                        <input type="date" name="dateOfBirth" class="input input-bordered w-full" required />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Gender *</legend>
+                        <select name="gender" class="select select-bordered w-full" required>
+                            <option disabled selected value="">Select Gender</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </fieldset>
+
+                    <fieldset class="fieldset md:col-span-2">
+                        <legend class="fieldset-legend">IC/Passport Number *</legend>
+                        <input type="text" name="ic" class="input input-bordered w-full" placeholder="Enter IC or Passport Number" required />
+                    </fieldset>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="divider text-primary font-semibold">Contact Information</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Email *</legend>
+                        <input type="email" name="email" class="input input-bordered w-full" placeholder="Enter email address" required />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Phone Number *</legend>
+                        <input type="tel" name="phoneNumber" class="input input-bordered w-full" placeholder="Enter phone number" pattern="[0-9]{10,11}" required />
+                    </fieldset>
+
+                    <fieldset class="fieldset md:col-span-2">
+                        <legend class="fieldset-legend">Address *</legend>
+                        <textarea name="address" class="textarea textarea-bordered w-full" placeholder="Enter full address" rows="3" required></textarea>
+                    </fieldset>
+                </div>
+
+                <!-- Account Security Section -->
+                <div class="divider text-primary font-semibold">Account Security</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Password *</legend>
+                        <input type="password" name="password" class="input input-bordered w-full" placeholder="Type password" required />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Confirm Password *</legend>
+                        <input type="password" name="confirmPassword" class="input input-bordered w-full" placeholder="Retype password" required />
+                    </fieldset>
+                </div>
+
+                <!-- Role & Assignment Section -->
+                <div class="divider text-primary font-semibold">Role & Assignment</div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">Role *</legend>
+                        <select id="roleSelect" name="role" class="select select-bordered w-full" required onchange="toggleRoleFields()">
+                            <option disabled selected value="">Select Role</option>
+                            <option value="ADMIN">Admin</option>
+                            <option value="ACADEMIC_LEADER">Academic Leader</option>
+                            <option value="LECTURER">Lecturer</option>
+                            <option value="STUDENT">Student</option>
+                        </select>
+                    </fieldset>
+
+                    <fieldset id="programmeIdField" class="fieldset hidden">
+                        <legend class="fieldset-legend">Programme ID</legend>
+                        <input type="number" name="programmeId" class="input input-bordered w-full" placeholder="Enter Programme ID" />
+                    </fieldset>
+
+                    <fieldset id="departmentIdField" class="fieldset hidden">
+                        <legend class="fieldset-legend">Department ID</legend>
+                        <input type="number" name="departmentId" class="input input-bordered w-full" placeholder="Enter Department ID" />
+                    </fieldset>
+                </div>
+
+                <div class="form-control mt-8">
+                    <button type="submit" class="btn btn-primary btn-lg text-white w-full">Register User</button>
                 </div>
             </form>
         </div>
     </dialog>
+
+
 
     <script>
         function toggleRoleFields() {

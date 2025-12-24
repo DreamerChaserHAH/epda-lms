@@ -1,43 +1,60 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.htetaung.lms.models.dto.UserDTO" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <%
     List<UserDTO> users = (List<UserDTO>) request.getAttribute("users");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 %>
 <div class="overflow-x-auto w-full pt-4">
     <table class="table table-s table-pin-rows table-pin-cols">
         <thead>
         <tr>
-            <th></th>
+            <th>ID</th>
             <td>Username</td>
             <td>Full Name</td>
+            <td>Date of Birth</td>
+            <td>Email</td>
+            <td>Phone</td>
+            <td>Gender</td>
             <td>Role</td>
             <td>Registered On</td>
             <td></td>
-            <th></th>
         </tr>
         </thead>
         <tbody>
         <% if (users != null) {
-            int index = 1;
             for (UserDTO user : users) { %>
         <tr>
             <th><%= user.userId %></th>
             <td><%= user.username %></td>
             <td><%= user.fullName %></td>
+            <td><%= dateFormat.format(user.dateOfBirth) %></td>
+            <td><%= user.email %></td>
+            <td><%= user.phoneNumber %></td>
+            <td><%= user.gender %></td>
             <td><%= user.role %></td>
             <td><%= user.registeredOn %></td>
             <td class="flex gap-2">
-                <button class="btn btn-outline"
-                        onclick="showEditModal('<%= user.userId %>', '<%= user.username %>', '<%= user.fullName %>', '<%= user.role %>')">
+                <button class="btn btn-sm btn-outline"
+                        onclick="showEditModal(
+                                '<%= user.userId %>',
+                                '<%= user.username %>',
+                                '<%= user.fullName %>',
+                                '<%= dateFormat.format(user.dateOfBirth) %>',
+                                '<%= user.ic %>',
+                                '<%= user.email %>',
+                                '<%= user.phoneNumber %>',
+                                '<%= user.address.replace("'", "\\'").replace("\n", "\\n") %>',
+                                '<%= user.gender %>',
+                                '<%= user.role %>')">
                     Edit
                 </button>
-                <button class="btn btn-outline btn-error"
-                        onclick="showDeleteConfirmation('<%= user.userId %>', '<%= user.username %>', '<%= user.fullName %>', '<%= user.role %>')">
+                <button class="btn btn-sm btn-outline btn-error"
+                        onclick="showDeleteConfirmation('<%= user.userId %>', '<%= user.username %>', '<%= user.fullName %>')">
                     Delete
                 </button>
             </td>
-            <th><%= user.userId %></th>
         </tr>
         <% }
         } %>
@@ -45,70 +62,135 @@
     </table>
 
     <dialog id="edit_user_modal" class="modal">
-        <div class="modal-box">
+        <div class="modal-box max-w-4xl max-h-[90vh] overflow-y-auto">
             <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
             <h3 class="text-lg font-bold">Edit User</h3>
 
-            <form id="editUserForm" method="POST" action="<%= request.getContextPath() %>/users" class="py-4">
+            <form id="editUserForm" method="POST" action="<%= request.getContextPath() %>/users" class="py-4 space-y-6">
                 <input type="hidden" name="_method" value="PUT" />
                 <input type="hidden" id="editUserId" name="userId" />
 
-                <% if (request.getParameter("searchQuery") != null) { %>
-                <input type="hidden" name="searchQuery" value="<%= request.getParameter("searchQuery") %>" />
-                <% } %>
-                <% if (request.getParameter("filterField") != null) { %>
-                <input type="hidden" name="filterField" value="<%= request.getParameter("filterField") %>" />
-                <% } %>
-                <% if (request.getParameter("pagination") != null) { %>
-                <input type="hidden" name="pagination" value="<%= request.getParameter("pagination") %>" />
-                <% } %>
+                <!-- Personal Information -->
+                <div class="divider text-primary font-semibold">Personal Information</div>
 
-                <div class="form-control w-full mb-4">
-                    <label class="label">
-                        <span class="label-text">Username</span>
-                    </label>
-                    <input type="text"
-                           id="editUsername"
-                           name="username"
-                           class="input input-bordered w-full"
-                           required />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Username *</span>
+                        </label>
+                        <input type="text" id="editUsername" name="username" class="input input-bordered w-full" required />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Full Name *</span>
+                        </label>
+                        <input type="text" id="editFullName" name="fullName" class="input input-bordered w-full" required />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Date of Birth *</span>
+                        </label>
+                        <input type="date" id="editDateOfBirth" name="dateOfBirth" class="input input-bordered w-full" required />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Gender *</span>
+                        </label>
+                        <select id="editGender" name="gender" class="select select-bordered w-full" required>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control md:col-span-2">
+                        <label class="label">
+                            <span class="label-text">IC/Passport Number *</span>
+                        </label>
+                        <input type="text" id="editIc" name="ic" class="input input-bordered w-full" required />
+                    </div>
                 </div>
 
-                <div class="form-control w-full mb-4">
-                    <label class="label">
-                        <span class="label-text">Full Name</span>
-                    </label>
-                    <input type="text"
-                           id="editFullName"
-                           name="fullName"
-                           class="input input-bordered w-full"
-                           required />
+                <!-- Contact Information -->
+                <div class="divider text-primary font-semibold">Contact Information</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Email *</span>
+                        </label>
+                        <input type="email" id="editEmail" name="email" class="input input-bordered w-full" required />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Phone Number *</span>
+                        </label>
+                        <input type="tel" id="editPhoneNumber" name="phoneNumber" class="input input-bordered w-full" pattern="[0-9]{10,11}" required />
+                    </div>
+
+                    <div class="form-control md:col-span-2">
+                        <label class="label">
+                            <span class="label-text">Address *</span>
+                        </label>
+                        <textarea id="editAddress" name="address" class="textarea textarea-bordered w-full" rows="3" required></textarea>
+                    </div>
                 </div>
 
-                <div class="form-control w-full mb-4">
+                <!-- Role -->
+                <div class="divider text-primary font-semibold">Role</div>
+
+                <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Role</span>
+                        <span class="label-text">Role *</span>
                     </label>
-                    <select id="editRole"
-                            name="role"
-                            class="select select-bordered w-full"
-                            required>
-                        <option value="student">Student</option>
-                        <option value="lecturer">Lecturer</option>
-                        <option value="academic_leader">Academic Leader</option>
-                        <option value="admin">Admin</option>
+                    <select id="editRole" name="role" class="select select-bordered w-full" required>
+                        <option value="STUDENT">Student</option>
+                        <option value="LECTURER">Lecturer</option>
+                        <option value="ACADEMIC_LEADER">Academic Leader</option>
+                        <option value="ADMIN">Admin</option>
                     </select>
                 </div>
 
-                <div class="modal-action">
+                <!-- Password Change (Optional) -->
+                <div class="divider text-primary font-semibold">Change Password (Optional)</div>
+
+                <div class="form-control mb-4">
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" id="changePasswordCheckbox" class="checkbox checkbox-primary" />
+                        <span class="label-text">Change user password</span>
+                    </label>
+                </div>
+
+                <div id="passwordFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">New Password</span>
+                        </label>
+                        <input type="password" id="editPassword" name="password" class="input input-bordered w-full" placeholder="Enter new password" />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Confirm New Password</span>
+                        </label>
+                        <input type="password" id="editConfirmPassword" name="confirmPassword" class="input input-bordered w-full" placeholder="Confirm new password" />
+                    </div>
+                </div>
+
+                <div class="modal-action mt-8">
                     <button type="button" onclick="edit_user_modal.close()" class="btn btn-outline">Cancel</button>
                     <button type="button" id="confirmEditBtn" class="btn btn-primary">Update User</button>
                 </div>
             </form>
         </div>
     </dialog>
+
     <dialog id="delete_confirmation_modal" class="modal">
         <div class="modal-box">
             <form method="dialog">
@@ -120,7 +202,6 @@
             <div id="userDetailsToDelete" class="bg-base-200 p-4 rounded-lg mb-4">
                 <p><strong>Username:</strong> <span id="deleteUsername"></span></p>
                 <p><strong>Full Name:</strong> <span id="deleteFullName"></span></p>
-                <p><strong>Role:</strong> <span id="deleteRole"></span></p>
             </div>
 
             <div class="modal-action">
@@ -135,28 +216,67 @@
     <script>
         let userIdToDelete = null;
 
-        function showDeleteConfirmation(userId, username, fullName, role) {
+        function showDeleteConfirmation(userId, username, fullName) {
             userIdToDelete = userId;
-
-            // Populate modal with user details
             document.getElementById('deleteUsername').textContent = username;
             document.getElementById('deleteFullName').textContent = fullName;
-            document.getElementById('deleteRole').textContent = role;
-
-            // Show modal
             delete_confirmation_modal.showModal();
         }
 
-        function showEditModal(userId, username, fullName, role) {
-            // Populate form fields
+        function showEditModal(userId, username, fullName, dateOfBirth, ic, email, phoneNumber, address, gender, role) {
             document.getElementById('editUserId').value = userId;
             document.getElementById('editUsername').value = username;
             document.getElementById('editFullName').value = fullName;
-            document.getElementById('editRole').value = role.toLowerCase();
 
-            // Show modal
+            // Parse dd/MM/yyyy and convert to yyyy-MM-dd for date input
+            if (dateOfBirth && dateOfBirth.trim() !== '') {
+                const parts = dateOfBirth.split('/');
+                if (parts.length === 3) {
+                    const day = parts[0].padStart(2, '0');
+                    const month = parts[1].padStart(2, '0');
+                    const year = parts[2];
+                    const formattedDate = year + '-' + month + '-' + day;
+                    document.getElementById('editDateOfBirth').value = formattedDate;
+                }
+            }
+
+            document.getElementById('editIc').value = ic;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editPhoneNumber').value = phoneNumber;
+            document.getElementById('editAddress').value = address;
+            document.getElementById('editGender').value = gender;
+            document.getElementById('editRole').value = role;
+
+            // Reset password fields
+            document.getElementById('changePasswordCheckbox').checked = false;
+            document.getElementById('passwordFields').classList.add('hidden');
+            document.getElementById('editPassword').value = '';
+            document.getElementById('editConfirmPassword').value = '';
+            document.getElementById('editPassword').removeAttribute('required');
+            document.getElementById('editConfirmPassword').removeAttribute('required');
+
             edit_user_modal.showModal();
         }
+
+
+        // Toggle password fields
+        document.getElementById('changePasswordCheckbox').addEventListener('change', function() {
+            const passwordFields = document.getElementById('passwordFields');
+            const passwordInput = document.getElementById('editPassword');
+            const confirmPasswordInput = document.getElementById('editConfirmPassword');
+
+            if (this.checked) {
+                passwordFields.classList.remove('hidden');
+                passwordInput.setAttribute('required', 'required');
+                confirmPasswordInput.setAttribute('required', 'required');
+            } else {
+                passwordFields.classList.add('hidden');
+                passwordInput.removeAttribute('required');
+                confirmPasswordInput.removeAttribute('required');
+                passwordInput.value = '';
+                confirmPasswordInput.value = '';
+            }
+        });
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
             if (userIdToDelete) {
@@ -164,9 +284,8 @@
                     const response = await fetch('<%= request.getContextPath() %>/users?userId=' + userIdToDelete, {
                         method: 'DELETE'
                     });
-
                     if (response.ok) {
-                        window.location.reload(); // Reload to see changes
+                        window.location.reload();
                     } else {
                         alert('Failed to delete user');
                     }
@@ -178,44 +297,46 @@
         });
 
         document.getElementById('confirmEditBtn').addEventListener('click', function() {
-            const form = document.getElementById('editUserForm');
+            const changePassword = document.getElementById('changePasswordCheckbox').checked;
+            const password = document.getElementById('editPassword').value;
+            const confirmPassword = document.getElementById('editConfirmPassword').value;
 
-            // Get form values
-            const userId = document.getElementById('editUserId').value;
-            const username = document.getElementById('editUsername').value;
-            const fullName = document.getElementById('editFullName').value;
-            const role = document.getElementById('editRole').value;
-
-            // Validate required fields
-            if (!username || !fullName || !role) {
-                alert('Please fill in all required fields');
-                return;
+            // Validate passwords if changing
+            if (changePassword) {
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    return;
+                }
             }
 
-            // Build URL parameters
             const params = new URLSearchParams({
-                userId: userId,
-                username: username,
-                fullName: fullName,
-                role: role
+                userId: document.getElementById('editUserId').value,
+                username: document.getElementById('editUsername').value,
+                fullName: document.getElementById('editFullName').value,
+                dateOfBirth: document.getElementById('editDateOfBirth').value,
+                ic: document.getElementById('editIc').value,
+                email: document.getElementById('editEmail').value,
+                phoneNumber: document.getElementById('editPhoneNumber').value,
+                address: document.getElementById('editAddress').value,
+                gender: document.getElementById('editGender').value,
+                role: document.getElementById('editRole').value
             });
 
-            // Preserve search/filter parameters
-            const searchQuery = '<%= request.getParameter("searchQuery") != null ? request.getParameter("searchQuery") : "" %>';
-            const filterField = '<%= request.getParameter("filterField") != null ? request.getParameter("filterField") : "" %>';
-            const pagination = '<%= request.getParameter("pagination") != null ? request.getParameter("pagination") : "" %>';
+            // Add password only if changing
+            if (changePassword) {
+                params.append('password', password);
+            }
 
-            if (searchQuery) params.append('searchQuery', searchQuery);
-            if (filterField) params.append('filterField', filterField);
-            if (pagination) params.append('pagination', pagination);
-
-            // Send PUT request
             fetch('<%= request.getContextPath() %>/users?' + params.toString(), {
                 method: 'PUT'
             })
                 .then(response => {
                     if (response.ok) {
-                        window.location.reload(); // Reload to see changes
+                        window.location.reload();
                     } else {
                         alert('Failed to update user');
                     }
@@ -225,6 +346,6 @@
                     alert('Error updating user');
                 });
         });
-
     </script>
+
 </div>

@@ -4,12 +4,14 @@ import com.htetaung.lms.ejbs.services.UserServiceFacade;
 import com.htetaung.lms.ejbs.facades.UserFacade;
 
 import com.htetaung.lms.models.Admin;
+import com.htetaung.lms.models.enums.Gender;
 import com.htetaung.lms.models.enums.UserRole;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -49,8 +51,14 @@ public class DatabaseInitializer {
         userServiceFacade.CreateUser(
                 "admin",
                 "admin",
+                new Date(),
+                "000000000000",
+                "admin@admin.com",
+                "0000000000",
+                "Admin Address",
                 "admin",
                 UserRole.ADMIN,
+                Gender.MALE,
                 additionalInfo,
                 "SYSTEM"
         );

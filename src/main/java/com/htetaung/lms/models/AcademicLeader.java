@@ -1,5 +1,6 @@
 package com.htetaung.lms.models;
 
+import com.htetaung.lms.models.enums.Gender;
 import com.htetaung.lms.models.enums.UserRole;
 
 import jakarta.persistence.Column;
@@ -9,6 +10,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Date;
 
 @Getter
 @Setter
@@ -24,13 +27,32 @@ public class AcademicLeader extends Staff{
         setRole(UserRole.ACADEMIC_LEADER);
     }
 
-    public AcademicLeader(String username, String full_name, String passwordHash, java.util.Optional<User> createdBy, Long department, Long programmeId) {
+    public AcademicLeader(
+            String username,
+            String full_name,
+            Date dateOfBirth,
+            String ic,
+            String email,
+            String phoneNumber,
+            String address,
+            String passwordHash,
+            java.util.Optional<User> createdBy,
+            Gender gender,
+            Long department,
+            Long programmeId
+    ) {
         super(
                 username,
                 full_name,
+                dateOfBirth,
+                ic,
+                email,
+                phoneNumber,
+                address,
                 passwordHash,
                 createdBy,
                 UserRole.ACADEMIC_LEADER,
+                gender,
                 department
         );
         this.programmeId = programmeId;

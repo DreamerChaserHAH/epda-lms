@@ -4,6 +4,7 @@ import com.htetaung.lms.ejbs.facades.*;
 import com.htetaung.lms.exception.AuthenticationException;
 import com.htetaung.lms.models.User;
 import com.htetaung.lms.models.dto.UserDTO;
+import com.htetaung.lms.models.enums.Gender;
 import com.htetaung.lms.models.enums.UserRole;
 import com.htetaung.lms.models.Student;
 import com.htetaung.lms.models.Lecturer;
@@ -16,6 +17,7 @@ import jakarta.ejb.Stateless;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +40,20 @@ public class UserServiceFacade {
     @EJB
     private UserFacade userFacade;
 
-    public void CreateUser(String username, String fullname, String password, UserRole role, Map<String, String> additionalInfo, String operatorUsername) throws IllegalArgumentException{
+    public void CreateUser(
+            String username,
+            String fullname,
+            Date dateOfBirth,
+            String ic,
+            String email,
+            String phoneNumber,
+            String address,
+            String password,
+            UserRole role,
+            Gender gender,
+            Map<String, String> additionalInfo,
+            String operatorUsername
+    ) throws IllegalArgumentException{
 
         if(!userFacade.isUsernameAvailable(username)){
             throw new IllegalArgumentException("Username already exists");
@@ -48,10 +63,16 @@ public class UserServiceFacade {
 
         User newUser = new User();
         newUser.setUsername(username);
+        newUser.setDateOfBirth(dateOfBirth);
+        newUser.setIc(ic);
+        newUser.setEmail(email);
+        newUser.setPhoneNumber(phoneNumber);
+        newUser.setAddress(address);
         newUser.setPasswordHash(hashedPassword);
         newUser.setFullName(fullname);
         newUser.setCreatedBy(null);
         newUser.setRole(role);
+        newUser.setGender(gender);
 
         switch (role){
             case STUDENT -> {
@@ -116,8 +137,14 @@ public class UserServiceFacade {
                         user.getUserId(),
                         user.getUsername(),
                         user.getFullName(),
+                        user.getDateOfBirth(),
+                        user.getIc(),
+                        user.getEmail(),
+                        user.getPhoneNumber(),
+                        user.getAddress(),
                         user.getRole(),
-                        user.getCreatedAt()
+                        user.getCreatedAt(),
+                        user.getGender()
                 ))
                 .toList();
     }
@@ -128,8 +155,14 @@ public class UserServiceFacade {
                         user.getUserId(),
                         user.getUsername(),
                         user.getFullName(),
+                        user.getDateOfBirth(),
+                        user.getIc(),
+                        user.getEmail(),
+                        user.getPhoneNumber(),
+                        user.getAddress(),
                         user.getRole(),
-                        user.getCreatedAt()
+                        user.getCreatedAt(),
+                        user.getGender()
                 ))
                 .toList();
     }
@@ -140,8 +173,14 @@ public class UserServiceFacade {
                         user.getUserId(),
                         user.getUsername(),
                         user.getFullName(),
+                        user.getDateOfBirth(),
+                        user.getIc(),
+                        user.getEmail(),
+                        user.getPhoneNumber(),
+                        user.getAddress(),
                         user.getRole(),
-                        user.getCreatedAt()
+                        user.getCreatedAt(),
+                        user.getGender()
                 ))
                 .toList();
     }
@@ -159,27 +198,109 @@ public class UserServiceFacade {
                         user.getUserId(),
                         user.getUsername(),
                         user.getFullName(),
+                        user.getDateOfBirth(),
+                        user.getIc(),
+                        user.getEmail(),
+                        user.getPhoneNumber(),
+                        user.getAddress(),
                         user.getRole(),
-                        user.getCreatedAt()
+                        user.getCreatedAt(),
+                        user.getGender()
                 ))
                 .toList();
     }
 
-    public void UpdateUser(Long userId, String username, String fullName, UserRole role, String operatorUsername) throws IllegalArgumentException{
+    public void UpdateUser(
+            Long userId,
+            String username,
+            String fullName,
+            Date dateOfBirth,
+            String ic,
+            String email,
+            String phoneNumber,
+            String address,
+            UserRole role,
+            Gender gender,
+            String operatorUsername
+    ) throws IllegalArgumentException {
         User userToUpdate = userFacade.find(userId);
 
-        if(!userToUpdate.getUsername().equals(username)){
-            if(!userFacade.isUsernameAvailable(username)){
+        if (userToUpdate == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        // Check username availability if changed
+        if (!userToUpdate.getUsername().equals(username)) {
+            if (!userFacade.isUsernameAvailable(username)) {
                 throw new IllegalArgumentException("Username already exists");
             }
             userToUpdate.setUsername(username);
         }
 
+        // Update all fields
         userToUpdate.setFullName(fullName);
+        userToUpdate.setDateOfBirth(dateOfBirth);
+        userToUpdate.setIc(ic);
+        userToUpdate.setEmail(email);
+        userToUpdate.setPhoneNumber(phoneNumber);
+        userToUpdate.setAddress(address);
         userToUpdate.setRole(role);
+        userToUpdate.setGender(gender);
 
         userFacade.edit(userToUpdate, operatorUsername);
     }
+
+    public void UpdateUserWithPassword(
+            Long userId,
+            String username,
+            String fullName,
+            Date dateOfBirth,
+            String ic,
+            String email,
+            String phoneNumber,
+            String address,
+            String password,
+            UserRole role,
+            Gender gender,
+            String operatorUsername
+    ) throws IllegalArgumentException {
+        User userToUpdate = userFacade.find(userId);
+
+        if (userToUpdate == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        // Check username availability if changed
+        if (!userToUpdate.getUsername().equals(username)) {
+            if (!userFacade.isUsernameAvailable(username)) {
+                throw new IllegalArgumentException("Username already exists");
+            }
+            userToUpdate.setUsername(username);
+        }
+
+        // Validate password
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
+
+        // Update all fields including password
+        userToUpdate.setFullName(fullName);
+        userToUpdate.setDateOfBirth(dateOfBirth);
+        userToUpdate.setIc(ic);
+        userToUpdate.setEmail(email);
+        userToUpdate.setPhoneNumber(phoneNumber);
+        userToUpdate.setAddress(address);
+        userToUpdate.setRole(role);
+        userToUpdate.setGender(gender);
+        userToUpdate.setPasswordHash(hashPassword(password));
+
+        userFacade.edit(userToUpdate, operatorUsername);
+    }
+
 
     private String hashPassword(String password) {
         try {
