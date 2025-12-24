@@ -157,6 +157,7 @@
             }.jsp"/>
             <jsp:include page="${pageToInclude}">
                 <jsp:param name="username" value="<%= username %>"/>
+                <jsp:param name="contextPath" value="${pageContext.request.ContextPath}"/>
             </jsp:include>
 
         </main>

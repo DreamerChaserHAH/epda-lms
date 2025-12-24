@@ -3,6 +3,7 @@ package com.htetaung.lms.ejbs.services;
 import com.htetaung.lms.ejbs.facades.*;
 import com.htetaung.lms.exception.AuthenticationException;
 import com.htetaung.lms.models.User;
+import com.htetaung.lms.models.dto.UserDTO;
 import com.htetaung.lms.models.enums.UserRole;
 import com.htetaung.lms.models.Student;
 import com.htetaung.lms.models.Lecturer;
@@ -15,6 +16,7 @@ import jakarta.ejb.Stateless;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 
@@ -95,6 +97,18 @@ public class UserServiceFacade {
         }
 
         return user;
+    }
+
+    public List<UserDTO> getUsers(int page){
+        return userFacade.findAllUsers(page).stream()
+                .map(user -> new UserDTO(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getFullName(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
     }
 
     private String hashPassword(String password) {

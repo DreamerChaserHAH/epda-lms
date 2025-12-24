@@ -5,6 +5,14 @@
   Time: 10:08 PM
   To change this template use File | Settings | File Templates.
 --%>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.htetaung.lms.models.dto.UserDTO" %>
+<%@ page import="java.util.List" %>
+<%
+    List<UserDTO> users = (List<UserDTO>) request.getAttribute("users");
+    Integer currentPage = (Integer) request.getAttribute("currentPage");
+    String contextPath = request.getParameter("contextPath").toString();
+%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <div>
     <div class="flex items-center justify-between pb-3 pt-3">
@@ -17,6 +25,17 @@
         </button>
     </div>
     <p class="text-lg text-gray-500 pr-6 pt-2">Manage all system users</p>
+    <div class="flex gap-2 w-full pt-2">
+        <label class="input flex-1">
+            <img src="<%= request.getContextPath()%>/images/icons/assign.png" alt="Search Icon" class="mr-2 w-5 h-5 object-contain" />
+            <input type="text" class="grow" placeholder="Search users..." />
+        </label>
+        <select class="select select-bordered w-40">
+            <option value="fullname" selected>Full Name</option>
+            <option value="username">Username</option>
+        </select>
+    </div>
+
     <dialog id="user_registration_modal" class="modal">
         <div class="modal-box">
             <form method="dialog">
@@ -24,267 +43,98 @@
             </form>
             <b class="text-lg font-bold">User Registration Form</b>
             <p class="py-4 text-gray-500">Press ESC key or click on ✕ button to close</p>
-            <form>
+            <p><%=contextPath%></p>
+            <form method="post" action="<%= contextPath%>/register">
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Username</legend>
-                    <input type="text" class="input" placeholder="Type unique username of the user" />
+                    <input type="text" name="username" class="input" placeholder="Type unique username of the user" required />
                 </fieldset>
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Full Name</legend>
-                    <input type="text" class="input" placeholder="Type the Full Name of the user" />
+                    <input type="text" name="fullName" class="input" placeholder="Type the Full Name of the user" required />
                 </fieldset>
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Password</legend>
-                    <input type="password" class="input" placeholder="Type password" />
+                    <input type="password" name="password" class="input" placeholder="Type password" required />
                 </fieldset>
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Confirm Password</legend>
-                    <input type="password" class="input" placeholder="Type Confirm Password" />
+                    <input type="password" name="confirmPassword" class="input" placeholder="Type Confirm Password" required />
                 </fieldset>
                 <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Browsers</legend>
-                    <select class="select">
-                        <option disabled selected>Role</option>
-                        <option>Admin</option>
-                        <option>Academic Leader</option>
-                        <option>Lecturer</option>
-                        <option>Student</option>
+                    <legend class="fieldset-legend">Role</legend>
+                    <select id="roleSelect" name="role" class="select" required onchange="toggleRoleFields()">
+                        <option disabled selected value="">Select Role</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="ACADEMIC_LEADER">Academic Leader</option>
+                        <option value="LECTURER">Lecturer</option>
+                        <option value="STUDENT">Student</option>
                     </select>
                 </fieldset>
+
+                <fieldset id="programmeIdField" class="fieldset hidden">
+                    <legend class="fieldset-legend">Programme ID</legend>
+                    <input type="number" name="programmeId" class="input" placeholder="Enter Programme ID" />
+                </fieldset>
+
+                <fieldset id="departmentIdField" class="fieldset hidden">
+                    <legend class="fieldset-legend">Department ID</legend>
+                    <input type="number" name="departmentId" class="input" placeholder="Enter Department ID" />
+                </fieldset>
+
                 <div class="form-control mt-6">
                     <button type="submit" class="btn btn-primary text-white">Register User</button>
                 </div>
             </form>
         </div>
     </dialog>
-    <div class="overflow-x-auto h-96 w-96">
-        <table class="table table-xs table-pin-rows table-pin-cols">
-            <thead>
-            <tr>
-                <th></th>
-                <td>User ID</td>
-                <td>Username</td>
-                <td>Full Name</td>
-                <td>Role</td>
-                <td>Registered On</td>
-                <td>Registered By</td>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>1</th>
-                <td>Cy Ganderton</td>
-                <td>Quality Control Specialist</td>
-                <td>Littel, Schaden and Vandervort</td>
-                <td>Canada</td>
-                <td>12/16/2020</td>
-                <td>Blue</td>
-                <th>1</th>
-            </tr>
-            <tr>
-                <th>2</th>
-                <td>Hart Hagerty</td>
-                <td>Desktop Support Technician</td>
-                <td>Zemlak, Daniel and Leannon</td>
-                <td>United States</td>
-                <td>12/5/2020</td>
-                <td>Purple</td>
-                <th>2</th>
-            </tr>
-            <tr>
-                <th>3</th>
-                <td>Brice Swyre</td>
-                <td>Tax Accountant</td>
-                <td>Carroll Group</td>
-                <td>China</td>
-                <td>8/15/2020</td>
-                <td>Red</td>
-                <th>3</th>
-            </tr>
-            <tr>
-                <th>4</th>
-                <td>Marjy Ferencz</td>
-                <td>Office Assistant I</td>
-                <td>Rowe-Schoen</td>
-                <td>Russia</td>
-                <td>3/25/2021</td>
-                <td>Crimson</td>
-                <th>4</th>
-            </tr>
-            <tr>
-                <th>5</th>
-                <td>Yancy Tear</td>
-                <td>Community Outreach Specialist</td>
-                <td>Wyman-Ledner</td>
-                <td>Brazil</td>
-                <td>5/22/2020</td>
-                <td>Indigo</td>
-                <th>5</th>
-            </tr>
-            <tr>
-                <th>6</th>
-                <td>Irma Vasilik</td>
-                <td>Editor</td>
-                <td>Wiza, Bins and Emard</td>
-                <td>Venezuela</td>
-                <td>12/8/2020</td>
-                <td>Purple</td>
-                <th>6</th>
-            </tr>
-            <tr>
-                <th>7</th>
-                <td>Meghann Durtnal</td>
-                <td>Staff Accountant IV</td>
-                <td>Schuster-Schimmel</td>
-                <td>Philippines</td>
-                <td>2/17/2021</td>
-                <td>Yellow</td>
-                <th>7</th>
-            </tr>
-            <tr>
-                <th>8</th>
-                <td>Sammy Seston</td>
-                <td>Accountant I</td>
-                <td>O'Hara, Welch and Keebler</td>
-                <td>Indonesia</td>
-                <td>5/23/2020</td>
-                <td>Crimson</td>
-                <th>8</th>
-            </tr>
-            <tr>
-                <th>9</th>
-                <td>Lesya Tinham</td>
-                <td>Safety Technician IV</td>
-                <td>Turner-Kuhlman</td>
-                <td>Philippines</td>
-                <td>2/21/2021</td>
-                <td>Maroon</td>
-                <th>9</th>
-            </tr>
-            <tr>
-                <th>10</th>
-                <td>Zaneta Tewkesbury</td>
-                <td>VP Marketing</td>
-                <td>Sauer LLC</td>
-                <td>Chad</td>
-                <td>6/23/2020</td>
-                <td>Green</td>
-                <th>10</th>
-            </tr>
-            <tr>
-                <th>11</th>
-                <td>Andy Tipple</td>
-                <td>Librarian</td>
-                <td>Hilpert Group</td>
-                <td>Poland</td>
-                <td>7/9/2020</td>
-                <td>Indigo</td>
-                <th>11</th>
-            </tr>
-            <tr>
-                <th>12</th>
-                <td>Sophi Biles</td>
-                <td>Recruiting Manager</td>
-                <td>Gutmann Inc</td>
-                <td>Indonesia</td>
-                <td>2/12/2021</td>
-                <td>Maroon</td>
-                <th>12</th>
-            </tr>
-            <tr>
-                <th>13</th>
-                <td>Florida Garces</td>
-                <td>Web Developer IV</td>
-                <td>Gaylord, Pacocha and Baumbach</td>
-                <td>Poland</td>
-                <td>5/31/2020</td>
-                <td>Purple</td>
-                <th>13</th>
-            </tr>
-            <tr>
-                <th>14</th>
-                <td>Maribeth Popping</td>
-                <td>Analyst Programmer</td>
-                <td>Deckow-Pouros</td>
-                <td>Portugal</td>
-                <td>4/27/2021</td>
-                <td>Aquamarine</td>
-                <th>14</th>
-            </tr>
-            <tr>
-                <th>15</th>
-                <td>Moritz Dryburgh</td>
-                <td>Dental Hygienist</td>
-                <td>Schiller, Cole and Hackett</td>
-                <td>Sri Lanka</td>
-                <td>8/8/2020</td>
-                <td>Crimson</td>
-                <th>15</th>
-            </tr>
-            <tr>
-                <th>16</th>
-                <td>Reid Semiras</td>
-                <td>Teacher</td>
-                <td>Sporer, Sipes and Rogahn</td>
-                <td>Poland</td>
-                <td>7/30/2020</td>
-                <td>Green</td>
-                <th>16</th>
-            </tr>
-            <tr>
-                <th>17</th>
-                <td>Alec Lethby</td>
-                <td>Teacher</td>
-                <td>Reichel, Glover and Hamill</td>
-                <td>China</td>
-                <td>2/28/2021</td>
-                <td>Khaki</td>
-                <th>17</th>
-            </tr>
-            <tr>
-                <th>18</th>
-                <td>Aland Wilber</td>
-                <td>Quality Control Specialist</td>
-                <td>Kshlerin, Rogahn and Swaniawski</td>
-                <td>Czech Republic</td>
-                <td>9/29/2020</td>
-                <td>Purple</td>
-                <th>18</th>
-            </tr>
-            <tr>
-                <th>19</th>
-                <td>Teddie Duerden</td>
-                <td>Staff Accountant III</td>
-                <td>Pouros, Ullrich and Windler</td>
-                <td>France</td>
-                <td>10/27/2020</td>
-                <td>Aquamarine</td>
-                <th>19</th>
-            </tr>
-            <tr>
-                <th>20</th>
-                <td>Lorelei Blackstone</td>
-                <td>Data Coordinator</td>
-                <td>Witting, Kutch and Greenfelder</td>
-                <td>Kazakhstan</td>
-                <td>6/3/2020</td>
-                <td>Red</td>
-                <th>20</th>
-            </tr>
-            </tbody>
-            <tfoot>
-            <tr>
-                <th></th>
-                <td>Name</td>
-                <td>Job</td>
-                <td>company</td>
-                <td>location</td>
-                <td>Last Login</td>
-                <td>Favorite Color</td>
-                <th></th>
-            </tr>
-            </tfoot>
-        </table>
-    </div>
+
+    <script>
+        function toggleRoleFields() {
+            const role = document.getElementById('roleSelect').value;
+
+            const programmeIdField = document.getElementById('programmeIdField');
+            const departmentIdField = document.getElementById('departmentIdField');
+
+            // Hide all fields and disable inputs
+            [ programmeIdField, departmentIdField].forEach(field => {
+                field.classList.add('hidden');
+                const input = field.querySelector('input');
+                input.value = '';
+                input.disabled = true;
+                input.removeAttribute('required');
+            });
+
+            // Show and enable fields based on role
+            if (role === 'STUDENT') {
+                // Show Student ID and Programme ID
+
+                programmeIdField.classList.remove('hidden');
+                const progInput = programmeIdField.querySelector('input');
+                progInput.disabled = false;
+                progInput.setAttribute('required', 'required');
+            } else if (role === 'LECTURER') {
+                // Show Staff Number and Department ID
+
+                departmentIdField.classList.remove('hidden');
+                const deptInput = departmentIdField.querySelector('input');
+                deptInput.disabled = false;
+                deptInput.setAttribute('required', 'required');
+            } else if (role === 'ACADEMIC_LEADER') {
+                // Show both Department ID and Programme ID
+                departmentIdField.classList.remove('hidden');
+                const deptInput = departmentIdField.querySelector('input');
+                deptInput.disabled = false;
+                deptInput.setAttribute('required', 'required');
+
+                programmeIdField.classList.remove('hidden');
+                const progInput = programmeIdField.querySelector('input');
+                progInput.disabled = false;
+                progInput.setAttribute('required', 'required');
+            }
+        }
+    </script>
+
+
+    <jsp:include page="/users?pagination=1" />
 </div>

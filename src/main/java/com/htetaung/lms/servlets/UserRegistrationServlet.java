@@ -62,13 +62,7 @@ public class UserRegistrationServlet extends HttpServlet {
             HashMap<String, String> additionalInfo = new HashMap<String, String>();
             switch (role){
                 case ADMIN -> {
-                    /// check department id
-                    if (departmentId == null || departmentId.trim().isEmpty()) {
-                        request.setAttribute("error", "Department is required for admin");
-                        doGet(request, response);
-                        return;
-                    }
-                    additionalInfo.put("departmentId", departmentId);
+                    additionalInfo.put("departmentId", "0");
                 }
                 case ACADEMIC_LEADER -> {
                     if (departmentId == null || departmentId.trim().isEmpty()) {
@@ -119,7 +113,7 @@ public class UserRegistrationServlet extends HttpServlet {
             );
 
             // Success - redirect to login
-            response.sendRedirect(request.getContextPath() + "/login?registered=true");
+            response.sendRedirect(request.getContextPath() + "/index.jsp?page=users&message=registration_success");
 
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Invalid number format");
