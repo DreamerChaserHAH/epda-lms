@@ -75,7 +75,7 @@
                     <select name="role" class="select select-bordered w-full" required>
                         <option value="STUDENT">Student</option>
                         <option value="LECTURER">Lecturer</option>
-                        <option value="LEADER">Academic Leader</option>
+                        <option value="ACADEMIC_LEADER">Academic Leader</option>
                         <option value="ADMIN">Admin</option>
                     </select>
                 </div>
@@ -90,8 +90,8 @@
             <div class="mt-6 bg-gray-50 rounded-lg p-4">
                 <p class="text-sm font-semibold text-gray-700 mb-2">Demo Credentials:</p>
                 <div class="text-sm text-gray-600 space-y-1">
-                    <p>Admin: admin / admin123</p>
-                    <p>Leader: leader / leader123</p>
+                    <p>Admin: admin / admin</p>
+                    <p>Academic Leader: leader / leader123</p>
                     <p>Lecturer: lecturer / lecturer123</p>
                     <p>Student: student / student123</p>
                 </div>

@@ -1,6 +1,5 @@
 package com.htetaung.lms.servlets;
 
-import com.htetaung.lms.ejbs.facades.UserFacade;
 import com.htetaung.lms.ejbs.services.UserServiceFacade;
 import com.htetaung.lms.models.User;
 import com.htetaung.lms.exception.AuthenticationException;
@@ -36,11 +35,18 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
         String roleParam = request.getParameter("role");
 
-        // Validate input
-        if (username == null || username.trim().isEmpty() ||
-            password == null || password.trim().isEmpty() ||
-            roleParam == null || roleParam.trim().isEmpty()) {
+        // Trim and validate input
+        if (username == null || password == null || roleParam == null) {
+            request.setAttribute("error", "All fields are required");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
+        
+        username = username.trim();
+        password = password.trim();
+        roleParam = roleParam.trim();
 
+        if (username.isEmpty() || password.isEmpty() || roleParam.isEmpty()) {
             request.setAttribute("error", "All fields are required");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;

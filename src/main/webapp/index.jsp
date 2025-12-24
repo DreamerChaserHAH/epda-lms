@@ -52,6 +52,8 @@
             //availablePages = new String[]{ "Modules"};
             availablePages = new Page[]{
                     new Page("Modules", "modules", "books.png"),
+                    new Page("Attendance", "attendance", "calendar.png"),
+                    new Page("Attendance Reports", "attendance_reports", "reports.png"),
             };
             break;
         case "Student":
@@ -147,9 +149,17 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-y-auto p-6">
-
-            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold font-title pr-6"><%= role %> Interface</h1>
-            <p class="text-lg text-gray-500 pr-6 pt-4 pb-4">Welcome back, <%= username %>!</p>
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold font-title pr-6"><%= role %> Interface</h1>
+                    <p class="text-lg text-gray-500 pr-6 pt-4 pb-4">Welcome back, <%= username %>!</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <% if (role.equalsIgnoreCase("Student")) { %>
+                        <jsp:include page="/WEB-INF/components/student/notifications.jsp"/>
+                    <% } %>
+                </div>
+            </div>
 
             <c:set var="role" value="<%= role.toLowerCase() %>"/>
             <c:set var="pageToInclude" value="/WEB-INF/components/${role}/${
