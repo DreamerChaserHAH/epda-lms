@@ -31,9 +31,21 @@ public class UserManagementServlet extends HttpServlet {
         request.setAttribute("users", users);
         request.setAttribute("currentPage", pagination);
 
-        // Forward to table fragment JSP
         request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
                 .include(request, response);
     }
 
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String userId = request.getParameter("userId");
+        if (userId != null && !userId.isEmpty()) {
+            Long userId_long = Long.parseLong(userId);
+            userServiceFacade.DeleteUser(userId_long, "");
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204 No Content
+            //request.getRequestDispatcher("/index.jsp?page=users").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Username is required");
+        }
+    }
 }

@@ -99,6 +99,17 @@ public class UserServiceFacade {
         return user;
     }
 
+    public void DeleteUser(Long userId, String operatorUsername){
+        User userToDelete = userFacade.find(userId);
+        userFacade.remove(userToDelete, operatorUsername);
+    }
+
+    public void DeleteUserByUsername(String username, String operatorUsername) throws IllegalArgumentException{
+        User userToDelete = userFacade.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        userFacade.remove(userToDelete, operatorUsername);
+    }
+
     public List<UserDTO> getUsers(int page){
         return userFacade.findAllUsers(page).stream()
                 .map(user -> new UserDTO(
