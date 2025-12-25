@@ -23,23 +23,28 @@
             <th><%= lecturer.userId %></th>
             <td><%= lecturer.fullname %></td>
             <td>
-                <select class="select select-bordered w-full"
-                        id="academicLeader_<%= lecturer.userId %>"
-                        data-original="<%= lecturer.academicLeaderUserId != null ? lecturer.academicLeaderUserId : "" %>"
-                        onchange="enableSaveButton(<%= lecturer.userId %>)">
-                    <option value="">Not Assigned</option>
-                    <% if (academicLeaders != null) {
-                        for (AcademicLeaderDTO leader : academicLeaders) { %>
-                    <option value="<%= leader.userId %>"
-                            <%= (lecturer.academicLeaderUserId != null && lecturer.academicLeaderUserId.equals(leader.userId)) ? "selected" : "" %>>
-                        <%= leader.fullname %> (<%= leader.numberOfLecturerInCharge %> lecturers)
-                    </option>
-                    <% }
-                    } %>
-                </select>
+                <form id="assignmentForm_<%= lecturer.userId %>" method="POST" action="<%= request.getContextPath() %>/lecturers">
+                    <input type="hidden" name="_method" value="PUT" />
+                    <input type="hidden" name="lecturerId" value="<%= lecturer.userId %>" />
+                    <select class="select select-bordered w-full"
+                            name="academicLeaderId"
+                            id="academicLeader_<%= lecturer.userId %>"
+                            data-original="<%= lecturer.academicLeaderUserId != null ? lecturer.academicLeaderUserId : "" %>"
+                            onchange="enableSaveButton(<%= lecturer.userId %>)">
+                        <option value="">Not Assigned</option>
+                        <% if (academicLeaders != null) {
+                            for (AcademicLeaderDTO leader : academicLeaders) { %>
+                        <option value="<%= leader.userId %>"
+                                <%= (lecturer.academicLeaderUserId != null && lecturer.academicLeaderUserId.equals(leader.userId)) ? "selected" : "" %>>
+                            <%= leader.fullname %> (<%= leader.numberOfLecturerInCharge %> lecturers)
+                        </option>
+                        <% }
+                        } %>
+                    </select>
+                </form>
             </td>
             <td>
-                <button class="btn btn-sm btn-primary"
+                <button type="button" class="btn btn-sm btn-primary"
                         id="saveBtn_<%= lecturer.userId %>"
                         onclick="saveAssignment(<%= lecturer.userId %>)"
                         disabled>
@@ -67,33 +72,9 @@
             }
         }
 
-        async function saveAssignment(lecturerId) {
-            const select = document.getElementById('academicLeader_' + lecturerId);
-            const academicLeaderId = select.value;
-
-            try {
-                const response = await fetch('<%= request.getContextPath() %>/lecturers', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        lecturerId: lecturerId,
-                        academicLeaderId: academicLeaderId
-                    })
-                });
-
-                if (response.ok) {
-                    select.setAttribute('data-original', academicLeaderId);
-                    enableSaveButton(lecturerId);
-                    alert('Lecturer assignment to Academic Leader updated successfully');
-                } else {
-                    alert('Failed to update assignment');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error updating assignment');
-            }
+        function saveAssignment(lecturerId) {
+            const form = document.getElementById('assignmentForm_' + lecturerId);
+            form.submit();
         }
     </script>
 </div>

@@ -66,6 +66,7 @@
     }
     String currentPage = request.getParameter("page");
     if (currentPage == null) currentPage = "dashboard";
+
 %>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -115,31 +116,31 @@
             <nav class="flex-1 p-4 space-y-2">
                 <!-- Dashboard - Always visible -->
                 <a href="?page=dashboard" class="menu-item <%= currentPage.equals("dashboard") ? "active" : "" %>">
-                    <img src="${pageContext.request.contextPath}/images/icons/dashboard.png" alt="Dashboard" class="menu-icon">
+                    <img src="<%= request.getContextPath()%>/images/icons/dashboard.png" alt="Dashboard" class="menu-icon">
                     <span>Dashboard</span>
                 </a>
 
                 <a href="?page=profile" class="menu-item <%= currentPage.equals("profile") ? "active" : "" %>">
-                    <img src="${pageContext.request.contextPath}/images/icons/profile.png" alt="Profile" class="menu-icon">
+                    <img src="<%= request.getContextPath()%>/images/icons/profile.png" alt="Profile" class="menu-icon">
                     <span>Profile</span>
                 </a>
 
                 <% for(Page availablePage : availablePages) { %>
                 <a href="?page=<%= availablePage.link %>" class="menu-item <%= currentPage.equals(availablePage.link) ? "active" : "" %>">
-                    <img src="${pageContext.request.contextPath}/images/icons/<%= availablePage.icon_filename %>" alt="<%= availablePage.name %>" class="menu-icon">
+                    <img src="<%= request.getContextPath()%>/images/icons/<%= availablePage.icon_filename %>" alt="<%= availablePage.name %>" class="menu-icon">
                     <span><%= availablePage.name %></span>
                 </a>
                 <% } %>
 
                 <!-- Settings - Always visible -->
                 <a href="?page=settings" class="menu-item <%= currentPage.equals("settings") ? "active" : "" %>">
-                    <img src="${pageContext.request.contextPath}/images/icons/settings.png" alt="Settings" class="menu-icon">
+                    <img src="<%= request.getContextPath() %>/images/icons/settings.png" alt="Settings" class="menu-icon">
                     <span>Settings</span>
                 </a>
 
                 <!-- Logout - Always visible -->
-                <a href="${pageContext.request.contextPath}/logout" class="menu-item">
-                    <img src="${pageContext.request.contextPath}/images/icons/logout.png" alt="Logout" class="menu-icon">
+                <a href="<%= request.getContextPath()%>/logout" class="menu-item">
+                    <img src="<%= request.getContextPath()%>/images/icons/logout.png" alt="Logout" class="menu-icon">
                     <span>Logout</span>
                 </a>
             </nav>
@@ -159,7 +160,7 @@
                 <jsp:param name="username" value="<%= username %>"/>
                 <jsp:param name="contextPath" value="${pageContext.request.ContextPath}"/>
             </jsp:include>
-
+            <jsp:include page="/WEB-INF/components/modal-message.jsp"/>
         </main>
     </div>
 </body>

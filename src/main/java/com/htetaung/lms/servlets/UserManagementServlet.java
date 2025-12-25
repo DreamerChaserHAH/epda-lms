@@ -142,15 +142,20 @@ public class UserManagementServlet extends HttpServlet {
                 );
             }
 
-            response.setStatus(HttpServletResponse.SC_OK);
+            request.getSession().setAttribute("messageType", "SUCCESS");
+            request.getSession().setAttribute("messageContent", "User with ID " + userId + " updated successfully");
 
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID");
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Invalid User ID Input");
         } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid role or gender value");
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Invalid Gender Input");
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error updating user: " + e.getMessage());
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Error Updating User: " + e.getMessage());
         }
+        response.sendRedirect("/index.jsp?page=users");
     }
 
 
@@ -161,10 +166,14 @@ public class UserManagementServlet extends HttpServlet {
         if (userId != null && !userId.isEmpty()) {
             Long userId_long = Long.parseLong(userId);
             userServiceFacade.DeleteUser(userId_long, "");
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204 No Content
+
+            request.getSession().setAttribute("messageType", "SUCCESS");
+            request.getSession().setAttribute("messageContent", "User with " + userId + " deleted successfully");
             //request.getRequestDispatcher("/index.jsp?page=users").forward(request, response);
         } else {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Username is required");
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "User ID is required for deletion");
         }
+        response.sendRedirect("/index.jsp?page=users");
     }
 }

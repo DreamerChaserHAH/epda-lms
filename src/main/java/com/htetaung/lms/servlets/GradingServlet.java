@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @WebServlet(name = "gradingServlet", urlPatterns = {"/gradings"})
 public class GradingServlet extends HttpServlet {
@@ -33,47 +32,82 @@ public class GradingServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String gradeSymbol = request.getParameter("gradeSymbol");
-        Integer minScore = Integer.parseInt(request.getParameter("minScore"));
-        Integer maxScore = Integer.parseInt(request.getParameter("maxScore"));
-
-        String operatedBy = ""; /// TODO
-
         try {
+            String gradeSymbol = request.getParameter("gradeSymbol");
+            Integer minScore = Integer.parseInt(request.getParameter("minScore"));
+            Integer maxScore = Integer.parseInt(request.getParameter("maxScore"));
+
+            String operatedBy = ""; /// TODO
+
             gradingServiceFacade.createGrading(gradeSymbol, minScore, maxScore, operatedBy);
-            response.setStatus(201);
-            response.sendRedirect("/index.jsp?page=grading");
-        }catch(ScoreOverlapException e){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+
+            request.getSession().setAttribute("messageType", "SUCCESS");
+            request.getSession().setAttribute("messageContent", "Grading rule '" + gradeSymbol + "' created successfully");
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Invalid score input");
+        } catch (ScoreOverlapException e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", e.getMessage());
+        } catch (Exception e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Error creating grading: " + e.getMessage());
         }
+
+        response.sendRedirect("/index.jsp?page=grading");
     }
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Long gradingId = Long.parseLong(request.getParameter("gradingId"));
-        String gradeSymbol = request.getParameter("gradeSymbol");
-        Integer minScore = Integer.parseInt(request.getParameter("minScore"));
-        Integer maxScore = Integer.parseInt(request.getParameter("maxScore"));
-
-        String operatedBy = ""; /// TODO
-
         try {
+            Long gradingId = Long.parseLong(request.getParameter("gradingId"));
+            String gradeSymbol = request.getParameter("gradeSymbol");
+            Integer minScore = Integer.parseInt(request.getParameter("minScore"));
+            Integer maxScore = Integer.parseInt(request.getParameter("maxScore"));
+
+            String operatedBy = ""; /// TODO
+
             gradingServiceFacade.updateGrading(gradingId, gradeSymbol, minScore, maxScore, operatedBy);
-            response.setStatus(200);
-        }catch(ScoreOverlapException e){
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+
+            request.getSession().setAttribute("messageType", "SUCCESS");
+            request.getSession().setAttribute("messageContent", "Grading rule '" + gradeSymbol + "' updated successfully");
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Invalid grading ID or score input");
+        } catch (ScoreOverlapException e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", e.getMessage());
+        } catch (Exception e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Error updating grading: " + e.getMessage());
         }
+
+        response.sendRedirect("/index.jsp?page=grading");
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Long gradingId = Long.parseLong(request.getParameter("gradingId"));
+        try {
+            Long gradingId = Long.parseLong(request.getParameter("gradingId"));
+            String operatedBy = ""; /// TODO
 
-        String operatedBy = ""; /// TODO
+            gradingServiceFacade.deleteGrading(gradingId, operatedBy);
 
-        gradingServiceFacade.deleteGrading(gradingId, operatedBy);
-        response.setStatus(200);
+            request.getSession().setAttribute("messageType", "SUCCESS");
+            request.getSession().setAttribute("messageContent", "Grading rule deleted successfully");
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Invalid grading ID");
+        } catch (Exception e) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Error deleting grading: " + e.getMessage());
+        }
+
+        response.sendRedirect("/index.jsp?page=grading");
     }
 }

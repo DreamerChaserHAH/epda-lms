@@ -150,15 +150,17 @@ public class UserRegistrationServlet extends HttpServlet {
                     ""
             );
 
-            response.sendRedirect(request.getContextPath() + "/index.jsp?page=users&message=registration_success");
+            request.getSession().setAttribute("messageType", "SUCCESS");
+            request.getSession().setAttribute("messageContent", "User registered successfully");
 
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Invalid number format");
-            doGet(request, response);
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Wrong Number Format: " + e.getMessage());
         } catch (Exception e) {
-            request.setAttribute("error", "Registration failed: " + e.getMessage());
-            doGet(request, response);
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "User Registration Failed: " + e.getMessage());
         }
+        response.sendRedirect(request.getContextPath() + "/index.jsp?page=users");
     }
 
 }

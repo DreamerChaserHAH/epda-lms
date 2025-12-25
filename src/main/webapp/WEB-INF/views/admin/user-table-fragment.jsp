@@ -68,7 +68,7 @@
             </form>
             <h3 class="text-lg font-bold">Edit User</h3>
 
-            <form id="editUserForm" method="POST" action="<%= request.getContextPath() %>/users" class="py-4 space-y-6">
+            <form id="editUserForm" method="POST" action="<%= request.getContextPath() %>/users" class="py-4 space-y-6" onsubmit="return validateEditForm()">
                 <input type="hidden" name="_method" value="PUT" />
                 <input type="hidden" id="editUserId" name="userId" />
 
@@ -172,20 +172,20 @@
                         <label class="label">
                             <span class="label-text">New Password</span>
                         </label>
-                        <input type="password" id="editPassword" name="password" class="input input-bordered w-full" placeholder="Enter new password" />
+                        <input type="password" id="editPassword" name="password" class="input input-bordered w-full" placeholder="Enter new password" minlength="6" />
                     </div>
 
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text">Confirm New Password</span>
                         </label>
-                        <input type="password" id="editConfirmPassword" name="confirmPassword" class="input input-bordered w-full" placeholder="Confirm new password" />
+                        <input type="password" id="editConfirmPassword" class="input input-bordered w-full" placeholder="Confirm new password" />
                     </div>
                 </div>
 
                 <div class="modal-action mt-8">
                     <button type="button" onclick="edit_user_modal.close()" class="btn btn-outline">Cancel</button>
-                    <button type="button" id="confirmEditBtn" class="btn btn-primary">Update User</button>
+                    <button type="submit" class="btn btn-primary">Update User</button>
                 </div>
             </form>
         </div>
@@ -205,19 +205,19 @@
             </div>
 
             <div class="modal-action">
-                <form method="dialog" class="flex gap-2">
-                    <button class="btn btn-outline">Cancel</button>
-                    <button type="button" id="confirmDeleteBtn" class="btn btn-error text-white">Delete User</button>
+                <form method="POST" action="<%= request.getContextPath() %>/users" class="flex gap-2">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <input type="hidden" id="deleteUserId" name="userId" />
+                    <button type="button" onclick="delete_confirmation_modal.close()" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-error text-white">Delete User</button>
                 </form>
             </div>
         </div>
     </dialog>
 
     <script>
-        let userIdToDelete = null;
-
         function showDeleteConfirmation(userId, username, fullName) {
-            userIdToDelete = userId;
+            document.getElementById('deleteUserId').value = userId;
             document.getElementById('deleteUsername').textContent = username;
             document.getElementById('deleteFullName').textContent = fullName;
             delete_confirmation_modal.showModal();
@@ -228,15 +228,13 @@
             document.getElementById('editUsername').value = username;
             document.getElementById('editFullName').value = fullName;
 
-            // Parse dd/MM/yyyy and convert to yyyy-MM-dd for date input
             if (dateOfBirth && dateOfBirth.trim() !== '') {
                 const parts = dateOfBirth.split('/');
                 if (parts.length === 3) {
                     const day = parts[0].padStart(2, '0');
                     const month = parts[1].padStart(2, '0');
                     const year = parts[2];
-                    const formattedDate = year + '-' + month + '-' + day;
-                    document.getElementById('editDateOfBirth').value = formattedDate;
+                    document.getElementById('editDateOfBirth').value = year + '-' + month + '-' + day;
                 }
             }
 
@@ -247,7 +245,6 @@
             document.getElementById('editGender').value = gender;
             document.getElementById('editRole').value = role;
 
-            // Reset password fields
             document.getElementById('changePasswordCheckbox').checked = false;
             document.getElementById('passwordFields').classList.add('hidden');
             document.getElementById('editPassword').value = '';
@@ -258,8 +255,26 @@
             edit_user_modal.showModal();
         }
 
+        function validateEditForm() {
+            const changePassword = document.getElementById('changePasswordCheckbox').checked;
+            if (changePassword) {
+                const password = document.getElementById('editPassword').value;
+                const confirmPassword = document.getElementById('editConfirmPassword').value;
 
-        // Toggle password fields
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return false;
+                }
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    return false;
+                }
+            } else {
+                document.getElementById('editPassword').removeAttribute('name');
+            }
+            return true;
+        }
+
         document.getElementById('changePasswordCheckbox').addEventListener('change', function() {
             const passwordFields = document.getElementById('passwordFields');
             const passwordInput = document.getElementById('editPassword');
@@ -277,75 +292,5 @@
                 confirmPasswordInput.value = '';
             }
         });
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
-            if (userIdToDelete) {
-                try {
-                    const response = await fetch('<%= request.getContextPath() %>/users?userId=' + userIdToDelete, {
-                        method: 'DELETE'
-                    });
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        alert('Failed to delete user');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error deleting user');
-                }
-            }
-        });
-
-        document.getElementById('confirmEditBtn').addEventListener('click', function() {
-            const changePassword = document.getElementById('changePasswordCheckbox').checked;
-            const password = document.getElementById('editPassword').value;
-            const confirmPassword = document.getElementById('editConfirmPassword').value;
-
-            // Validate passwords if changing
-            if (changePassword) {
-                if (password !== confirmPassword) {
-                    alert('Passwords do not match');
-                    return;
-                }
-                if (password.length < 6) {
-                    alert('Password must be at least 6 characters');
-                    return;
-                }
-            }
-
-            const params = new URLSearchParams({
-                userId: document.getElementById('editUserId').value,
-                username: document.getElementById('editUsername').value,
-                fullName: document.getElementById('editFullName').value,
-                dateOfBirth: document.getElementById('editDateOfBirth').value,
-                ic: document.getElementById('editIc').value,
-                email: document.getElementById('editEmail').value,
-                phoneNumber: document.getElementById('editPhoneNumber').value,
-                address: document.getElementById('editAddress').value,
-                gender: document.getElementById('editGender').value,
-                role: document.getElementById('editRole').value
-            });
-
-            // Add password only if changing
-            if (changePassword) {
-                params.append('password', password);
-            }
-
-            fetch('<%= request.getContextPath() %>/users?' + params.toString(), {
-                method: 'PUT'
-            })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        alert('Failed to update user');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error updating user');
-                });
-        });
     </script>
-
 </div>

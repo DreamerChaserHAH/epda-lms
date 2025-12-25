@@ -52,7 +52,8 @@
             </form>
             <h3 class="text-lg font-bold">Edit Grading</h3>
 
-            <form id="editGradingForm" class="py-4 space-y-4">
+            <form method="POST" action="<%= request.getContextPath() %>/gradings" class="py-4 space-y-4" onsubmit="return validateEditForm()">
+                <input type="hidden" name="_method" value="PUT" />
                 <input type="hidden" id="editGradingId" name="gradingId" />
 
                 <div class="form-control">
@@ -78,7 +79,7 @@
 
                 <div class="modal-action">
                     <button type="button" onclick="edit_grading_modal.close()" class="btn btn-outline">Cancel</button>
-                    <button type="button" id="confirmEditBtn" class="btn btn-primary">Update Grading</button>
+                    <button type="submit" class="btn btn-primary">Update Grading</button>
                 </div>
             </form>
         </div>
@@ -92,11 +93,13 @@
             <h3 class="text-lg font-bold">Delete Grading</h3>
             <p class="py-4">Are you sure you want to delete grading rule <strong id="deleteGradeSymbol"></strong>?</p>
 
-            <input type="hidden" id="deleteGradingId" />
-
             <div class="modal-action">
-                <button type="button" onclick="delete_grading_modal.close()" class="btn btn-outline">Cancel</button>
-                <button type="button" id="confirmDeleteBtn" class="btn btn-error">Delete</button>
+                <form method="POST" action="<%= request.getContextPath() %>/gradings" class="flex gap-2">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <input type="hidden" id="deleteGradingId" name="gradingId" />
+                    <button type="button" onclick="delete_grading_modal.close()" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-error">Delete</button>
+                </form>
             </div>
         </div>
     </dialog>
@@ -116,65 +119,15 @@
             delete_grading_modal.showModal();
         }
 
-        document.getElementById('confirmEditBtn').addEventListener('click', async function() {
-            const gradingId = document.getElementById('editGradingId').value;
-            const gradeSymbol = document.getElementById('editGradeSymbol').value;
-            const minScore = document.getElementById('editMinScore').value;
-            const maxScore = document.getElementById('editMaxScore').value;
+        function validateEditForm() {
+            const minScore = parseInt(document.getElementById('editMinScore').value);
+            const maxScore = parseInt(document.getElementById('editMaxScore').value);
 
-            if (parseInt(minScore) > parseInt(maxScore)) {
+            if (minScore > maxScore) {
                 alert('Min Score cannot be greater than Max Score');
-                return;
+                return false;
             }
-
-            try {
-                const response = await fetch('<%= request.getContextPath() %>/gradings', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        gradingId: gradingId,
-                        gradeSymbol: gradeSymbol,
-                        minScore: minScore,
-                        maxScore: maxScore
-                    })
-                });
-
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to update grading');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error updating grading');
-            }
-        });
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
-            const gradingId = document.getElementById('deleteGradingId').value;
-
-            try {
-                const response = await fetch('<%= request.getContextPath() %>/gradings', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        gradingId: gradingId
-                    })
-                });
-
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to delete grading');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error deleting grading');
-            }
-        });
+            return true;
+        }
     </script>
 </div>

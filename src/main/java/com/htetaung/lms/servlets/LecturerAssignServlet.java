@@ -45,7 +45,10 @@ public class LecturerAssignServlet extends HttpServlet {
 
         staffServiceFacade.updateLecturerAcademicLeader(lecturerId, academicLeaderId, operatedBy);
 
-        response.setStatus(200);
+        request.getSession().setAttribute("messageType", "SUCCESS");
+        request.getSession().setAttribute("messageContent", "Lecturer with User ID " + lecturerId + " updated successfully");
+
+        response.sendRedirect("/index.jsp?page=lecturer-assignment");
     }
 
 }
