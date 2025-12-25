@@ -3,6 +3,7 @@ package com.htetaung.lms.ejbs.facades;
 import com.htetaung.lms.models.AcademicLeader;
 import com.htetaung.lms.models.Lecturer;
 import com.htetaung.lms.exception.AuthenticationException;
+import com.htetaung.lms.models.dto.LecturerDTO;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -11,6 +12,7 @@ import jakarta.persistence.PersistenceContext;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 
 @Stateless
 public class LecturerFacade extends AbstractFacade<Lecturer>{
@@ -35,6 +37,20 @@ public class LecturerFacade extends AbstractFacade<Lecturer>{
                 .setParameter("academicLeaderId", academicLeaderId)
                 .getSingleResult();
         return count;
+    }
+
+    public List<LecturerDTO> listAllLecturersUnderAcademicLeader(Long academicLeaderId){
+        List<Lecturer> lecturers = em.createQuery(
+                "SELECT l FROM Lecturer l WHERE l.academicLeader.userId = :academicLeaderId", Lecturer.class)
+                .setParameter("academicLeaderId", academicLeaderId)
+                .getResultList();
+        return lecturers.stream().map(
+                l -> new LecturerDTO(
+                        l.getUserId(),
+                        l.getFullName(),
+                        l.getAcademicLeader() != null ? l.getAcademicLeader().getUserId() : null
+                )
+        ).toList();
     }
 
     public void updateLecturerAcademicLeader(Long lecturerId, Long academicLeaderId, String operatedBy) {

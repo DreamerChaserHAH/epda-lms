@@ -12,9 +12,7 @@
     }
 
     String username = (String) session.getAttribute("username");
-    UserRole role_object = (UserRole) session.getAttribute("role");
-    String role = role_object != null ?
-                UserRole.roleToString(role_object) : "student";
+    UserRole role = (UserRole) session.getAttribute("role");
     
     // Get current page for active menu highlighting
 
@@ -32,7 +30,7 @@
 
     Page[] availablePages;
     switch (role) {
-        case "Admin":
+        case ADMIN:
             //availablePages = new String[]{ "Users", "Modules", "Classes", "Grading Reports"};
             availablePages = new Page[]{
                     new Page("Users", "users", "users.png"),
@@ -41,20 +39,20 @@
                     new Page("Grading System", "grading", "reports.png")
             };
             break;
-        case "AcademicLeader":
+        case ACADEMIC_LEADER:
             //availablePages = new String[]{ "Modules", "Assign Lecturers"};
             availablePages = new Page[]{
                     new Page("Modules", "modules", "books.png"),
                     new Page("Assign Lecturers", "assign_lecturers", "assign.png")
             };
             break;
-        case "Lecturer":
+        case LECTURER:
             //availablePages = new String[]{ "Modules"};
             availablePages = new Page[]{
                     new Page("Modules", "modules", "books.png"),
             };
             break;
-        case "Student":
+        case STUDENT:
             availablePages = new Page[] {
                     new Page("My Results", "my_results", "results.png"),
                     new Page("Calendar", "calendar", "calendar.png"),
@@ -149,10 +147,10 @@
         <!-- Main Content Area -->
         <main class="flex-1 overflow-y-auto p-6">
 
-            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold font-title pr-6"><%= role %> Interface</h1>
+            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold font-title pr-6"><%= UserRole.roleToString(role) %> Interface</h1>
             <p class="text-lg text-gray-500 pr-6 pt-4 pb-4">Welcome back, <%= username %>!</p>
 
-            <c:set var="role" value="<%= role.toLowerCase() %>"/>
+            <c:set var="role" value="<%= UserRole.roleToString(role).toLowerCase() %>"/>
             <c:set var="pageToInclude" value="/WEB-INF/components/${role}/${
                  param.page != null ? param.page : 'dashboard'
             }.jsp"/>

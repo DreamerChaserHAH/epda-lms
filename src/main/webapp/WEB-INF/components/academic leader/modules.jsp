@@ -1,16 +1,19 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: victor
-  Date: 12/23/25
-  Time: 10:07 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Title</title>
-</head>
-<body>
+<%
+    String contextPath = request.getContextPath();
+%>
+<div>
+    <div class="flex items-center justify-between pb-3 pt-3">
+        <h2 class="font-title font-bold text-2xl">Modules System</h2>
+        <button type="button"
+                class="btn btn-primary text-white font-semibold px-4 py-2 rounded-lg transition-colors"
+                onclick="create_module_modal.showModal()">
+            Create Module
+        </button>
+    </div>
+    <p class="text-lg text-gray-500 pr-6 pt-2">Manage the modules</p>
 
-</body>
-</html>
+    <jsp:include page="/modules?form=true"/>
+
+    <jsp:include page="/modules"/>
+</div>

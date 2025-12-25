@@ -75,7 +75,7 @@
                     <select name="role" class="select select-bordered w-full" required>
                         <option value="STUDENT">Student</option>
                         <option value="LECTURER">Lecturer</option>
-                        <option value="LEADER">Academic Leader</option>
+                        <option value="ACADEMIC_LEADER">Academic Leader</option>
                         <option value="ADMIN">Admin</option>
                     </select>
                 </div>
