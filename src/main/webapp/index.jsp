@@ -36,9 +36,9 @@
             //availablePages = new String[]{ "Users", "Modules", "Classes", "Grading Reports"};
             availablePages = new Page[]{
                     new Page("Users", "users", "users.png"),
-                    new Page("Modules", "modules", "books.png"),
+                    new Page("Lecturers", "lecturer-assignment", "assign.png"),
                     new Page("Classes", "classes", "classes.png"),
-                    new Page("Grading Reports", "grading_reports", "reports.png")
+                    new Page("Grading System", "grading", "reports.png")
             };
             break;
         case "AcademicLeader":

@@ -19,7 +19,7 @@ import java.util.Optional;
 @PrimaryKeyJoinColumn(name="user_id")
 public class Lecturer extends Staff{
     @ManyToOne(optional = true)
-    @JoinColumn(name = "academic_leader_in_charge", nullable = true, updatable = false)
+    @JoinColumn(name = "academic_leader_in_charge", nullable = true, updatable = true)
     private AcademicLeader academicLeader;
 
     public Lecturer(

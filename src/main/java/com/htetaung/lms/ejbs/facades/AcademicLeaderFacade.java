@@ -10,6 +10,7 @@ import jakarta.persistence.PersistenceContext;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 
 @Stateless
 public class AcademicLeaderFacade extends AbstractFacade<AcademicLeader>{
@@ -26,5 +27,10 @@ public class AcademicLeaderFacade extends AbstractFacade<AcademicLeader>{
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+
+    public List<AcademicLeader> getAllAcademicLeaders() {
+        return em.createQuery("SELECT a FROM AcademicLeader a", AcademicLeader.class)
+                 .getResultList();
     }
 }
