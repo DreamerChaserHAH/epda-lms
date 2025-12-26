@@ -53,4 +53,9 @@ public class ModuleFacade extends AbstractFacade<Module>{
                 .setMaxResults(PAGE_SIZE)
                 .getResultList();
     }
+
+    public boolean moduleExists(Long moduleId){
+        Module m = find(moduleId);
+        return m != null;
+    }
 }

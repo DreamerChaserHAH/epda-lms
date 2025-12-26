@@ -4,6 +4,7 @@ import com.htetaung.lms.ejbs.services.UserServiceFacade;
 import com.htetaung.lms.models.dto.UserDTO;
 import com.htetaung.lms.models.enums.Gender;
 import com.htetaung.lms.models.enums.UserRole;
+import com.htetaung.lms.utils.RequestParameterProcessor;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,13 +27,11 @@ public class UserManagementServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String pagination_string = request.getParameter("pagination");
-        String search_query = request.getParameter("searchQuery");
-        String filter_field = request.getParameter("filterField");
+        String pagination_string = RequestParameterProcessor.getStringValue("pagination", request, "1");
+        String search_query = RequestParameterProcessor.getStringValue("searchQuery", request, "");
+        String filter_field = RequestParameterProcessor.getStringValue("filterField", request, "");
+        String includingPage = (String) request.getAttribute("includingPage");
 
-        if (pagination_string == null || pagination_string.isEmpty()) {
-            pagination_string = "1";
-        }
         int pagination = Integer.parseInt(pagination_string);
 
         if (search_query == null || search_query.isEmpty()) {
@@ -44,14 +43,14 @@ public class UserManagementServlet extends HttpServlet {
                 filter_field = "fullName";
             }
 
-            if(filter_field == "username") {
+            if(filter_field.equals("username")) {
                 List<UserDTO> users = userServiceFacade.searchUsersByUsername(search_query, pagination);
                 request.setAttribute("users", users);
                 request.setAttribute("currentPage", pagination);
                 request.setAttribute("searchQuery", search_query);
                 request.setAttribute("filterField", filter_field);
             }
-            if(filter_field == "role"){
+            else if(filter_field.equals("role")){
                 List<UserDTO> users = userServiceFacade.searchUsersByRole(search_query, pagination);
                 request.setAttribute("users", users);
                 request.setAttribute("currentPage", pagination);
@@ -66,8 +65,18 @@ public class UserManagementServlet extends HttpServlet {
                 request.setAttribute("filterField", filter_field);
             }
         }
-        request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
-                .include(request, response);
+
+        if(includingPage != null){
+            if (!includingPage.isEmpty()) {
+                request.getRequestDispatcher(includingPage).include(request, response);
+            }else{
+                request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
+                        .include(request, response);
+            }
+        }else {
+            request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
+                    .include(request, response);
+        }
     }
 
     @Override

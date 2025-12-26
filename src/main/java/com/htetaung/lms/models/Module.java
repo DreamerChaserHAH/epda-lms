@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +32,9 @@ public class Module {
     @JoinColumn(name="managing_lecturer")
     ///  The lecturer that is assigned to manage this module
     private Lecturer managedBy;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Class> classes = new ArrayList<>();
 
     public Module(String moduleName, AcademicLeader createdBy, Lecturer managedBy) {
         this.moduleName = moduleName;

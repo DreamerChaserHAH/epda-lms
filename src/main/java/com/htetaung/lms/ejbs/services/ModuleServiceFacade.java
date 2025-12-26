@@ -67,6 +67,19 @@ public class ModuleServiceFacade {
         ).toList();
     }
 
+    public ModuleDTO GetModule(Long moduleId) throws ModuleException {
+        Module module = moduleFacade.find(moduleId);
+        if(module == null) {
+            throw new ModuleException("Module not found");
+        }
+        return new ModuleDTO(
+                module.getModuleId(),
+                module.getModuleName(),
+                new AcademicLeaderDTO(module.getCreatedBy()),
+                module.getManagedBy() != null ? new LecturerDTO(module.getManagedBy()) : null
+        );
+    }
+
     public void UpdateModule(Long moduleId, String moduleName, Long lecturerId, String operatedBy) throws ModuleException {
         Module module = moduleFacade.find(moduleId);
         if(module == null) {
