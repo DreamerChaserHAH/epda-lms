@@ -13,7 +13,8 @@
 
     String username = (String) session.getAttribute("username");
     UserRole role = (UserRole) session.getAttribute("role");
-    
+
+    String userId_parameter = request.getParameter("userId");
     // Get current page for active menu highlighting
 
     class Page {
@@ -155,6 +156,7 @@
                  param.page != null ? param.page : 'dashboard'
             }.jsp"/>
             <jsp:include page="${pageToInclude}">
+                <jsp:param name="userId" value="<%= userId_parameter %>"/>
                 <jsp:param name="username" value="<%= username %>"/>
                 <jsp:param name="contextPath" value="${pageContext.request.ContextPath}"/>
             </jsp:include>

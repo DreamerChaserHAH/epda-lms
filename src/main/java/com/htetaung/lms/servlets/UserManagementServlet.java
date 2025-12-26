@@ -155,7 +155,13 @@ public class UserManagementServlet extends HttpServlet {
             request.getSession().setAttribute("messageType", "ERROR");
             request.getSession().setAttribute("messageContent", "Error Updating User: " + e.getMessage());
         }
-        response.sendRedirect("/index.jsp?page=users");
+        // Get the referer URL or default to profile page
+        String referer = request.getHeader("Referer");
+        if (referer != null && !referer.isEmpty()) {
+            response.sendRedirect(referer);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/index.jsp?page=users");
+        }
     }
 
 

@@ -120,6 +120,26 @@ public class UserServiceFacade {
         return user;
     }
 
+    public UserDTO GetUser(Long userId){
+        User user = userFacade.find(userId);
+        if (user == null){
+            return null;
+        }
+        return new UserDTO(
+                user.getUserId(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getDateOfBirth(),
+                user.getIc(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getAddress(),
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getGender()
+        );
+    }
+
     public void DeleteUser(Long userId, String operatorUsername){
         User userToDelete = userFacade.find(userId);
         userFacade.remove(userToDelete, operatorUsername);
