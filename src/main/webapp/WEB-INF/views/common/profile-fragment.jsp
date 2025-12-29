@@ -17,6 +17,10 @@
 
   Long currentUserId = (Long) session.getAttribute("userId");
   UserDTO user = (UserDTO) request.getAttribute("userProfile");
+
+  if( user == null ) {
+      return;
+  }
   String contextPath = request.getContextPath();
 
   // Check if viewing own profile
@@ -46,7 +50,7 @@
     <%= isOwnProfile ? "Manage your profile information" : "View user profile information" %>
   </p>
 
-  <form id="profileForm" method="POST" action="<%= contextPath %>/users" class="mt-6">
+  <form id="profileForm" method="POST" action="<%= contextPath %>/api/users" class="mt-6">
     <input type="hidden" name="_method" value="PUT" />
     <input type="hidden" name="userId" value="<%= user.userId %>" />
     <input type="hidden" name="username" value="<%= user.username %>" />
@@ -247,7 +251,7 @@
       <h3 class="text-lg font-bold">Change Password</h3>
       <p class="py-4 text-gray-500">Press ESC key or click on ✕ button to close</p>
 
-      <form method="POST" action="<%= contextPath %>/users" class="space-y-4">
+      <form method="POST" action="<%= contextPath %>/api/users" class="space-y-4">
         <input type="hidden" name="_method" value="PUT" />
         <input type="hidden" name="userId" value="<%= user.userId %>" />
         <input type="hidden" name="username" value="<%= user.username %>" />

@@ -10,6 +10,4 @@
   }
 %>
 
-<jsp:include page="/profile">
-  <jsp:param name="userId" value="<%= userId %>"/>
-</jsp:include>
+<jsp:include page="/api/users/<%=userId%>"/>

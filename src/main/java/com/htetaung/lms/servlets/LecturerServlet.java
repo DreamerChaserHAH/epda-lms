@@ -13,8 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "lecturerAssignServlet", urlPatterns = {"/lecturers"})
-public class LecturerAssignServlet extends HttpServlet {
+@WebServlet(name = "lecturerServlet", urlPatterns = {"/lecturers"})
+public class LecturerServlet extends HttpServlet {
     @EJB
     private StaffServiceFacade staffServiceFacade;
 

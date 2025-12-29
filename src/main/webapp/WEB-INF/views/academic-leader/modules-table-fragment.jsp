@@ -3,6 +3,12 @@
 <%@ page import="com.htetaung.lms.models.dto.LecturerDTO" %>
 <%@ page import="java.util.List" %>
 <%
+    if (request.getAttribute("lecturers") == null || request.getAttribute("modules") == null) {
+        request.setAttribute("includingPage", "/WEB-INF/views/academic-leader/modules-table-fragment.jsp");
+        request.getRequestDispatcher("/api/modules").include(request, response);
+        return;
+    }
+
     List<ModuleDTO> modules = (List<ModuleDTO>) request.getAttribute("modules");
     List<LecturerDTO> lecturers = (List<LecturerDTO>) request.getAttribute("lecturers");
 %>
@@ -23,7 +29,7 @@
             <th><%= module.moduleId %></th>
             <td><%= module.moduleName %></td>
             <td>
-                <form id="assignmentForm_<%= module.moduleId %>" method="POST" action="<%= request.getContextPath() %>/modules">
+                <form id="assignmentForm_<%= module.moduleId %>" method="POST" action="<%= request.getContextPath() %>/api/modules">
                     <input type="hidden" name="_method" value="PUT" />
                     <input type="hidden" name="moduleId" value="<%= module.moduleId %>" />
                     <input type="hidden" name="moduleName" value="<%= module.moduleName %>" />
@@ -73,7 +79,7 @@
             <p class="py-4">Are you sure you want to delete module <strong id="deleteModuleName"></strong>?</p>
 
             <div class="modal-action">
-                <form method="POST" action="<%= request.getContextPath() %>/modules" class="flex gap-2">
+                <form method="POST" action="<%= request.getContextPath() %>/api/modules" class="flex gap-2">
                     <input type="hidden" name="_method" value="DELETE" />
                     <input type="hidden" id="deleteModuleId" name="moduleId" />
                     <button type="button" onclick="delete_module_modal.close()" class="btn btn-outline">Cancel</button>

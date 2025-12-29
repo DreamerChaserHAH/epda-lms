@@ -13,7 +13,7 @@
         request.setAttribute("searchQuery", "ACADEMIC_LEADER");
         request.setAttribute("filterField", "role");
         request.setAttribute("includingPage", "/WEB-INF/views/admin/classes-academic-leader-dropdown-fragment.jsp");
-        request.getRequestDispatcher("/users").include(request, response);
+        request.getRequestDispatcher("/api/users").include(request, response);
         return;
     }
 

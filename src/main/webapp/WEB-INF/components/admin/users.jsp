@@ -50,7 +50,7 @@
         <button type="submit" class="btn btn-primary">Search</button>
 
         <% if (request.getParameter("searchQuery") != null && !request.getParameter("searchQuery").isEmpty()) { %>
-        <a href="<%= request.getContextPath() %>/users?pagination=1" class="btn btn-outline">Clear</a>
+        <a href="<%= request.getContextPath() %>/api/users?pagination=1" class="btn btn-outline">Clear</a>
         <% } %>
     </form>
 
@@ -63,7 +63,7 @@
             <b class="text-lg font-bold">User Registration Form</b>
             <p class="py-4 text-gray-500">Press ESC key or click on ✕ button to close</p>
 
-            <form method="post" action="<%= contextPath%>/register" class="space-y-6">
+            <form method="post" action="<%= contextPath%>/api/users" class="space-y-6">
                 <!-- Personal Information Section -->
                 <div class="divider text-primary font-semibold">Personal Information</div>
 
@@ -217,11 +217,11 @@
 
 
     <% if(!searchQuery.isEmpty()){ %>
-        <jsp:include page="/users?pagination=1">
+        <jsp:include page="/api/users?pagination=1">
             <jsp:param name="searchQuery" value="<%= searchQuery %>"/>
             <jsp:param name="filterFiled" value="<%= filterField %>"/>
         </jsp:include>
     <% } else { %>
-        <jsp:include page="/users?pagination=1"/>
+        <jsp:include page="/api/users?pagination=1"/>
     <% }  %>
 </div>

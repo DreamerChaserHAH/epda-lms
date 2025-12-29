@@ -4,6 +4,7 @@ import com.htetaung.lms.ejbs.services.UserServiceFacade;
 import com.htetaung.lms.models.dto.UserDTO;
 import com.htetaung.lms.models.enums.Gender;
 import com.htetaung.lms.models.enums.UserRole;
+import com.htetaung.lms.utils.MessageModal;
 import com.htetaung.lms.utils.RequestParameterProcessor;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
@@ -16,9 +17,12 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
-@WebServlet(name = "userManagementServlet", urlPatterns = {"/users"})
+@WebServlet(name = "userManagementServlet", urlPatterns = {
+        "/api/users"
+})
 public class UserManagementServlet extends HttpServlet {
 
     @EJB
@@ -27,10 +31,37 @@ public class UserManagementServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        String includingPage = (String) request.getAttribute("includingPage");
+        String userIdString = RequestParameterProcessor.getStringValue("requestedUserId", request, "");
+
+        if (userIdString != null && !userIdString.isEmpty()) {
+            Long userId = Long.parseLong(userIdString);
+
+            try {
+                UserDTO userDTO = userServiceFacade.GetUser(userId);
+                if (userDTO == null) {
+                    MessageModal.DisplayErrorMessage("User Not Found with ID: " + userId, request);
+                    return;
+                }
+
+                request.setAttribute("userProfile", userDTO);
+
+                String targetPage = (includingPage != null && !includingPage.isEmpty())
+                        ? includingPage
+                        : "/WEB-INF/views/common/profile-fragment.jsp";
+
+                request.getRequestDispatcher(targetPage).include(request, response);
+                return;
+            }catch(Exception ex){
+                MessageModal.DisplayErrorMessage("Error Fetching User Profile: " + ex.getMessage(), request);
+            }
+        }
+
+        // GET /api/users or /api/users/ - List users (pathInfo = null or "/")
         String pagination_string = RequestParameterProcessor.getStringValue("pagination", request, "1");
         String search_query = RequestParameterProcessor.getStringValue("searchQuery", request, "");
         String filter_field = RequestParameterProcessor.getStringValue("filterField", request, "");
-        String includingPage = (String) request.getAttribute("includingPage");
 
         int pagination = Integer.parseInt(pagination_string);
 
@@ -38,45 +69,160 @@ public class UserManagementServlet extends HttpServlet {
             List<UserDTO> users = userServiceFacade.getUsers(pagination);
             request.setAttribute("users", users);
             request.setAttribute("currentPage", pagination);
-        }else{
-            if(filter_field==null || filter_field.isEmpty()){
+        } else {
+            if (filter_field == null || filter_field.isEmpty()) {
                 filter_field = "fullName";
             }
 
-            if(filter_field.equals("username")) {
-                List<UserDTO> users = userServiceFacade.searchUsersByUsername(search_query, pagination);
-                request.setAttribute("users", users);
-                request.setAttribute("currentPage", pagination);
-                request.setAttribute("searchQuery", search_query);
-                request.setAttribute("filterField", filter_field);
-            }
-            else if(filter_field.equals("role")){
-                List<UserDTO> users = userServiceFacade.searchUsersByRole(search_query, pagination);
-                request.setAttribute("users", users);
-                request.setAttribute("currentPage", pagination);
-                request.setAttribute("searchQuery", search_query);
-                request.setAttribute("filterField", filter_field);
-            }
-            else{
-                List<UserDTO> users = userServiceFacade.searchUsersByFullName(search_query, pagination);
-                request.setAttribute("users", users);
-                request.setAttribute("currentPage", pagination);
-                request.setAttribute("searchQuery", search_query);
-                request.setAttribute("filterField", filter_field);
-            }
+            List<UserDTO> users = switch (filter_field) {
+                case "username" -> userServiceFacade.searchUsersByUsername(search_query, pagination);
+                case "role" -> userServiceFacade.searchUsersByRole(search_query, pagination);
+                default -> userServiceFacade.searchUsersByFullName(search_query, pagination);
+            };
+
+            request.setAttribute("users", users);
+            request.setAttribute("currentPage", pagination);
+            request.setAttribute("searchQuery", search_query);
+            request.setAttribute("filterField", filter_field);
         }
 
-        if(includingPage != null){
-            if (!includingPage.isEmpty()) {
-                request.getRequestDispatcher(includingPage).include(request, response);
-            }else{
-                request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
-                        .include(request, response);
+        String targetPage = (includingPage != null && !includingPage.isEmpty())
+                ? includingPage
+                : "/WEB-INF/views/admin/user-table-fragment.jsp";
+
+        request.getRequestDispatcher(targetPage).include(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            String includingPage = (String) request.getAttribute("includingPage");
+
+            String username = request.getParameter("username");
+            String fullName = request.getParameter("fullName");
+            String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirmPassword");
+            String roleParam = request.getParameter("role");
+            String genderParam = request.getParameter("gender");
+
+            // New fields
+            String dateOfBirthStr = request.getParameter("dateOfBirth");
+            String ic = request.getParameter("ic");
+            String email = request.getParameter("email");
+            String phoneNumber = request.getParameter("phoneNumber");
+            String address = request.getParameter("address");
+
+            String programmeId = request.getParameter("programmeId");
+            String departmentId = request.getParameter("departmentId");
+
+            // Validate input - update to include new required fields
+            if (username == null || username.trim().isEmpty() ||
+                    fullName == null || fullName.trim().isEmpty() ||
+                    password == null || password.trim().isEmpty() ||
+                    dateOfBirthStr == null || dateOfBirthStr.trim().isEmpty() ||
+                    ic == null || ic.trim().isEmpty() ||
+                    email == null || email.trim().isEmpty() ||
+                    phoneNumber == null || phoneNumber.trim().isEmpty() ||
+                    address == null || address.trim().isEmpty() ||
+                    roleParam == null || roleParam.trim().isEmpty() ||
+                    genderParam == null || genderParam.trim().isEmpty()
+            ) {
+                request.setAttribute("error", "All fields are required");
+                MessageModal.DisplayErrorMessage("All fields are required", request);
+                doGet(request, response);
+                return;
             }
-        }else {
-            request.getRequestDispatcher("/WEB-INF/views/admin/user-table-fragment.jsp")
-                    .include(request, response);
+
+            // Validate password match
+            if (!password.equals(confirmPassword)) {
+                request.setAttribute("error", "Passwords do not match");
+                doGet(request, response);
+                return;
+            }
+
+            Date dateOfBirth = null;
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                sdf.setLenient(false);
+                dateOfBirth = sdf.parse(dateOfBirthStr);
+            } catch (ParseException e) {
+                request.setAttribute("error", "Invalid date format");
+                doGet(request, response);
+                return;
+            }
+
+            UserRole role = UserRole.valueOf(roleParam);
+            Gender gender = Gender.valueOf(genderParam);
+            HashMap<String, String> additionalInfo = new HashMap<String, String>();
+
+            // Existing role-based validation logic remains the same...
+            switch (role){
+                case ADMIN -> {
+                    additionalInfo.put("departmentId", "0");
+                }
+                case ACADEMIC_LEADER -> {
+                    if (departmentId == null || departmentId.trim().isEmpty()) {
+                        request.setAttribute("error", "Department is required for Academic Leader");
+                        doGet(request, response);
+                        return;
+                    }
+                    if (programmeId == null || programmeId.trim().isEmpty()) {
+                        request.setAttribute("error", "Programme is required for Academic Leader");
+                        doGet(request, response);
+                        return;
+                    }
+                    additionalInfo.put("departmentId", departmentId);
+                    additionalInfo.put("programmeId", programmeId);
+                }
+                case LECTURER -> {
+                    if (departmentId == null || departmentId.trim().isEmpty()) {
+                        request.setAttribute("error", "Department is required for Lecturer");
+                        doGet(request, response);
+                        return;
+                    }
+                    additionalInfo.put("departmentId", departmentId);
+                }
+                case STUDENT -> {
+                    if (programmeId == null || programmeId.trim().isEmpty()) {
+                        request.setAttribute("error", "Programme is required for Student");
+                        doGet(request, response);
+                        return;
+                    }
+                    additionalInfo.put("programmeId", programmeId);
+                }
+                default -> {
+                    request.setAttribute("error", "Invalid role selected");
+                    MessageModal.DisplayErrorMessage("Invalid role selected", request);
+                    doGet(request, response);
+                    return;
+                }
+            }
+
+            // Update CreateUser call with all 11 parameters
+            userServiceFacade.CreateUser(
+                    username,
+                    fullName,
+                    dateOfBirth,
+                    ic,
+                    email,
+                    phoneNumber,
+                    address,
+                    password,
+                    role,
+                    gender,
+                    additionalInfo,
+                    ""
+            );
+
+            MessageModal.DisplaySuccessMessage("User registered successfully", request);
+
+        } catch (NumberFormatException e) {
+            MessageModal.DisplayErrorMessage("Wrong Number Format", request);
+        } catch (Exception e) {
+            MessageModal.DisplayErrorMessage("User Registration Failed", request);
         }
+        response.sendRedirect(request.getContextPath() + "/index.jsp?page=users");
     }
 
     @Override

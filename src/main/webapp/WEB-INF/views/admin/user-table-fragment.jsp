@@ -68,7 +68,7 @@
             </form>
             <h3 class="text-lg font-bold">Edit User</h3>
 
-            <form id="editUserForm" method="POST" action="<%= request.getContextPath() %>/users" class="py-4 space-y-6" onsubmit="return validateEditForm()">
+            <form id="editUserForm" method="POST" action="<%= request.getContextPath() %>/api/users" class="py-4 space-y-6" onsubmit="return validateEditForm()">
                 <input type="hidden" name="_method" value="PUT" />
                 <input type="hidden" id="editUserId" name="userId" />
 
@@ -205,7 +205,7 @@
             </div>
 
             <div class="modal-action">
-                <form method="POST" action="<%= request.getContextPath() %>/users" class="flex gap-2">
+                <form method="POST" action="<%= request.getContextPath() %>/api/users" class="flex gap-2">
                     <input type="hidden" name="_method" value="DELETE" />
                     <input type="hidden" id="deleteUserId" name="userId" />
                     <button type="button" onclick="delete_confirmation_modal.close()" class="btn btn-outline">Cancel</button>

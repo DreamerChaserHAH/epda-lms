@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "moduleServlet", urlPatterns = {"/modules"})
+@WebServlet(name = "moduleServlet", urlPatterns = {"/api/modules"})
 public class ModuleServlet extends HttpServlet {
     @EJB
     private ModuleServiceFacade moduleServiceFacade;
@@ -27,6 +27,9 @@ public class ModuleServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        String includingPage = (String) request.getAttribute("includingPage");
+
         HttpSession session = request.getSession();
         Long userId = (Long)session.getAttribute("userId");
         UserRole userRole = (UserRole) session.getAttribute("role");
@@ -46,14 +49,11 @@ public class ModuleServlet extends HttpServlet {
                 /// DO NOTHING
             }
 
-            String isForm = request.getParameter("form");
-            if (isForm != null && isForm.equals("true")) {
-                request.getRequestDispatcher("/WEB-INF/views/academic-leader/modules-form-fragment.jsp")
-                        .include(request, response);
-                return;
-            }
-            request.getRequestDispatcher("/WEB-INF/views/academic-leader/modules-table-fragment.jsp")
-                    .include(request, response);
+            String targetPage = (includingPage != null && !includingPage.isEmpty())
+                    ? includingPage
+                    : "/WEB-INF/views/academic-leader/modules-table-fragment.jsp";
+
+            request.getRequestDispatcher(targetPage).include(request, response);
         }
     }
 

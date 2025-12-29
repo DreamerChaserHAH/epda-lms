@@ -13,7 +13,7 @@
     </div>
     <p class="text-lg text-gray-500 pr-6 pt-2">Manage the modules</p>
 
-    <jsp:include page="/modules?form=true"/>
+    <jsp:include page="../../views/academic-leader/modules-form-fragment.jsp"/>
+    <jsp:include page="../../views/academic-leader/modules-table-fragment.jsp"/>
 
-    <jsp:include page="/modules"/>
 </div>

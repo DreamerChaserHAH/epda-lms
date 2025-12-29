@@ -2,6 +2,12 @@
 <%@ page import="com.htetaung.lms.models.dto.LecturerDTO" %>
 <%@ page import="java.util.List" %>
 <%
+
+    if (request.getAttribute("lecturers") == null) {
+        request.setAttribute("includingPage", "/WEB-INF/views/academic-leader/modules-form-fragment.jsp");
+        request.getRequestDispatcher("/api/modules").include(request, response);
+        return;
+    }
     // Retrieve lecturers set by the servlet
     List<LecturerDTO> lecturers = (List<LecturerDTO>) request.getAttribute("lecturers");
     String contextPath = request.getContextPath();
@@ -15,7 +21,7 @@
         <h3 class="text-lg font-bold">Create New Module</h3>
         <p class="py-4 text-gray-500">Press ESC key or click on ✕ button to close</p>
 
-        <form method="POST" action="<%= contextPath %>/modules" class="space-y-4">
+        <form method="POST" action="<%= contextPath %>/api/modules" class="space-y-4">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Module Name *</legend>
                 <input type="text"

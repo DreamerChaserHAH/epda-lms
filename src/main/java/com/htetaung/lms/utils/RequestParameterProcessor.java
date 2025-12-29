@@ -9,6 +9,7 @@ public class RequestParameterProcessor {
             return value;
         }
         Object value_object = request.getAttribute(param);
+        request.removeAttribute(param);
         if(value_object != null){
             try {
                 value = value_object.toString();
