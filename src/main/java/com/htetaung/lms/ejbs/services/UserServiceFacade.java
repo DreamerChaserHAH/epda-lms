@@ -14,6 +14,7 @@ import com.htetaung.lms.models.Admin;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -57,6 +58,15 @@ public class UserServiceFacade {
 
         if(!userFacade.isUsernameAvailable(username)){
             throw new IllegalArgumentException("Username already exists");
+        }
+
+        // Trim and validate password before hashing
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        password = password.trim();
+        if (password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
         }
 
         String hashedPassword = hashPassword(password);
@@ -105,16 +115,31 @@ public class UserServiceFacade {
     }
 
     public User authenticateUser(String username, String password, UserRole role) throws AuthenticationException {
+        if (username == null || password == null || role == null) {
+            throw new AuthenticationException("Invalid username or password");
+        }
+        
+        // Trim username and password
+        username = username.trim();
+        password = password.trim();
+        
+        if (username.isEmpty() || password.isEmpty()) {
+            throw new AuthenticationException("Invalid username or password");
+        }
+        
         User user = userFacade.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException("Invalid username or password"));
 
         String hashedPassword = hashPassword(password);
-        if (!user.getPasswordHash().equals(hashedPassword)) {
+        String storedHash = user.getPasswordHash();
+        
+        if (storedHash == null || !storedHash.equals(hashedPassword)) {
             throw new AuthenticationException("Invalid username or password");
         }
 
-        if (user.getRole() != role) {
-            throw new AuthenticationException("User does not have the required role");
+        // Check role - use equals() instead of != for enum comparison
+        if (!user.getRole().equals(role)) {
+            throw new AuthenticationException("User does not have the required role. User role: " + user.getRole() + ", Required role: " + role);
         }
 
         return user;
@@ -323,9 +348,12 @@ public class UserServiceFacade {
 
 
     private String hashPassword(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
+            byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Password hashing failed", e);

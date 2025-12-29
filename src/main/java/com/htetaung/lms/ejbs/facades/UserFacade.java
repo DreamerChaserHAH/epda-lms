@@ -6,6 +6,7 @@ import com.htetaung.lms.models.enums.UserRole;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 
@@ -35,14 +36,18 @@ public class UserFacade extends AbstractFacade<User>{
     }
 
     public Optional<User> findByUsername(String username) throws IllegalArgumentException {
-        TypedQuery<User> query = em.createQuery(
-                "SELECT u FROM User u WHERE u.username = :username", User.class);
-        query.setParameter("username", username);
-        Optional<User> user = Optional.of(query.getSingleResult());
-        if (!user.isPresent()) {
-            throw new IllegalArgumentException("Username does not exist");
+        if (username == null || username.trim().isEmpty()) {
+            return Optional.empty();
         }
-        return user;
+        TypedQuery<User> query = em.createQuery(
+                "SELECT u FROM User u WHERE LOWER(u.username) = LOWER(:username)", User.class);
+        query.setParameter("username", username.trim());
+        try {
+            User user = query.getSingleResult();
+            return Optional.of(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     public boolean isUsernameAvailable(String username){
