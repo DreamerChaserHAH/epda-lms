@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="JBoss/WildFly 38.0.0.Final" type="JBossConfiguration" factoryName="Local" APPLICATION_SERVER_NAME="JBoss/WildFly 38.0.0.Final" ALTERNATIVE_JRE_ENABLED="true" ALTERNATIVE_JRE_PATH="$APPLICATION_HOME_DIR$/jbr/Contents/Home">
     <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8080/index.jsp" />
+    <option name="BROWSER_ID" value="e5120d43-2c3f-47ef-9f26-65e539e05186" />
     <deployment>
       <artifact name="lms:war exploded">
         <settings />

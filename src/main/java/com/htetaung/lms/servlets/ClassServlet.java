@@ -10,6 +10,7 @@ import com.htetaung.lms.models.dto.ClassDTO;
 import com.htetaung.lms.models.dto.ModuleDTO;
 import com.htetaung.lms.models.dto.StudentDTO;
 import com.htetaung.lms.utils.RequestParameterProcessor;
+import com.sun.net.httpserver.Request;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -140,6 +141,7 @@ public class ClassServlet extends HttpServlet {
 
         String moduleId_String = RequestParameterProcessor.getStringValue("moduleId", request, null);
         String className = RequestParameterProcessor.getStringValue("className", request, null);
+        String classDescriptipn = RequestParameterProcessor.getStringValue("classDescription", request, null);
         String operatedBy = (String) request.getSession().getAttribute("username");
         String leaderId_String = RequestParameterProcessor.getStringValue("leaderId", request, "");
 
@@ -157,9 +159,16 @@ public class ClassServlet extends HttpServlet {
             return;
         }
 
+        if (classDescriptipn == null || classDescriptipn.trim().isEmpty()) {
+            request.getSession().setAttribute("messageType", "ERROR");
+            request.getSession().setAttribute("messageContent", "Class description is required");
+            response.sendRedirect(request.getContextPath() + "/index.jsp?page=classes&leaderId=" + leaderId_String);
+            return;
+        }
+
         try {
             Long moduleId = Long.parseLong(moduleId_String);
-            classServiceFacade.CreateClass(moduleId, className.trim(), operatedBy);
+            classServiceFacade.CreateClass(moduleId, className.trim(), classDescriptipn, operatedBy);
 
             request.getSession().setAttribute("messageType", "SUCCESS");
             request.getSession().setAttribute("messageContent", "Class created successfully!");

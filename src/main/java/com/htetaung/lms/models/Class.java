@@ -27,6 +27,9 @@ public class Class {
     @Column(name="class_name", nullable=false)
     private String className;
 
+    @Column(name="description", columnDefinition="TEXT")
+    private String description;
+
     @ManyToMany
     @JoinTable(
             name = "class_enrollment",
@@ -35,9 +38,10 @@ public class Class {
     )
     private List<Student> enrolledStudents = new ArrayList<>();
 
-    public Class(Module module, String className) {
+    public Class(Module module, String className, String description) {
         this.module = module;
         this.className = className;
+        this.description = description;
         this.enrolledStudents = new ArrayList<>();
     }
 

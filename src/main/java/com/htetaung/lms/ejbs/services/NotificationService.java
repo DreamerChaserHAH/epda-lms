@@ -1,11 +1,11 @@
 package com.htetaung.lms.ejbs.services;
 
-import com.htetaung.lms.ejbs.facades.ClassEnrollmentFacade;
 import com.htetaung.lms.ejbs.facades.NotificationFacade;
 import com.htetaung.lms.ejbs.facades.UserFacade;
-import com.htetaung.lms.models.ClassEnrollment;
+import com.htetaung.lms.exception.ClassException;
 import com.htetaung.lms.models.Notification;
 import com.htetaung.lms.models.User;
+import com.htetaung.lms.models.dto.ClassEnrollmentDTO;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
@@ -21,7 +21,7 @@ public class NotificationService {
     private UserFacade userFacade;
 
     @EJB
-    private ClassEnrollmentFacade enrollmentFacade;
+    private ClassServiceFacade enrollmentFacade;
 
     @EJB
     private EmailService emailService;
@@ -40,12 +40,12 @@ public class NotificationService {
         notificationFacade.edit(notification, "system");
     }
 
-    public void notifyNewAssignment(Long assessmentId, String assessmentName, Long classId) {
+    public void notifyNewAssignment(Long assessmentId, String assessmentName, Long classId) throws ClassException {
         if (classId != null) {
-            List<ClassEnrollment> enrollments = enrollmentFacade.findByClassId(classId);
-            for (ClassEnrollment enrollment : enrollments) {
+            List<ClassEnrollmentDTO> enrollments = enrollmentFacade.FindEnrollmentsInClass(classId);
+            for (ClassEnrollmentDTO enrollment : enrollments) {
                 createNotification(
-                    enrollment.getStudent(),
+                    userFacade.find(enrollment.getStudentDTO().userId),
                     "New Assignment: " + assessmentName,
                     "A new assignment has been posted: " + assessmentName,
                     "NEW_ASSIGNMENT",
@@ -84,12 +84,12 @@ public class NotificationService {
         }
     }
 
-    public void notifyAnnouncement(Long classId, String title, String message) {
+    public void notifyAnnouncement(Long classId, String title, String message) throws ClassException {
         if (classId != null) {
-            List<ClassEnrollment> enrollments = enrollmentFacade.findByClassId(classId);
-            for (ClassEnrollment enrollment : enrollments) {
+            List<ClassEnrollmentDTO> enrollments = enrollmentFacade.FindEnrollmentsInClass(classId);
+            for (ClassEnrollmentDTO enrollment : enrollments) {
                 createNotification(
-                    enrollment.getStudent(),
+                        userFacade.find(enrollment.getStudentDTO().userId),
                     "Announcement: " + title,
                     message,
                     "ANNOUNCEMENT",

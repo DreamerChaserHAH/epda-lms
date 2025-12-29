@@ -73,4 +73,9 @@ public class StudentFacade extends AbstractFacade<Student>{
                 )
         ).toList();
     }
+
+    public boolean studentExists(Long studentId){
+        Student student = find(studentId);
+        return student != null;
+    }
 }

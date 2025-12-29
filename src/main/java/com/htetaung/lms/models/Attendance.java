@@ -22,7 +22,7 @@ public class Attendance implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "class_id", nullable = false)
-    private ClassEntity classEntity;
+    private Class classEntity;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "student_id", nullable = false)
@@ -49,7 +49,7 @@ public class Attendance implements Serializable {
     public Attendance() {
     }
 
-    public Attendance(ClassEntity classEntity, User student, Date attendanceDate, String status, User markedBy) {
+    public Attendance(Class classEntity, User student, Date attendanceDate, String status, User markedBy) {
         this.classEntity = classEntity;
         this.student = student;
         this.attendanceDate = attendanceDate;

@@ -8,6 +8,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -41,4 +42,15 @@ public class ClassFacade extends AbstractFacade<Class>{
                 .setParameter("moduleId", moduleId)
                 .getResultList();
     }
+
+    // java
+    public List<Class> findClassesOfStudent(Long studentId) {
+        TypedQuery<Class> q = em.createQuery(
+                "SELECT c FROM Class c JOIN c.enrolledStudents s WHERE s.userId = :id",
+                Class.class
+        );
+        q.setParameter("id", studentId);
+        return q.getResultList();
+    }
+
 }

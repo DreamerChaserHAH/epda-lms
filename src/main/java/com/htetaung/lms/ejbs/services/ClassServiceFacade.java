@@ -8,6 +8,7 @@ import com.htetaung.lms.exception.ModuleException;
 import com.htetaung.lms.models.Class;
 import com.htetaung.lms.models.Module;
 import com.htetaung.lms.models.dto.ClassDTO;
+import com.htetaung.lms.models.dto.ClassEnrollmentDTO;
 import com.htetaung.lms.models.dto.ModuleDTO;
 import com.htetaung.lms.models.dto.StudentDTO;
 import jakarta.ejb.EJB;
@@ -29,13 +30,13 @@ public class ClassServiceFacade {
     @EJB
     private ModuleServiceFacade moduleServiceFacade;
 
-    public void CreateClass(Long moduleId, String className, String operatedBy) throws ClassException{
+    public void CreateClass(Long moduleId, String className, String description, String operatedBy) throws ClassException{
         if(!moduleFacade.moduleExists(moduleId)){
             throw new ClassException("Module not found");
         }
 
         Module m = moduleFacade.find(moduleId);
-        Class newClass = new Class(m, className);
+        Class newClass = new Class(m, className, description);
         classFacade.create(newClass, operatedBy);
     }
 
@@ -47,6 +48,7 @@ public class ClassServiceFacade {
             return new ClassDTO(
                     classInQuestion.getClassId(),
                     classInQuestion.getClassName(),
+                    classInQuestion.getDescription(),
                     moduleServiceFacade.GetModule(classInQuestion.getModule().getModuleId()),
                     classInQuestion.getEnrolledStudents().stream().map(
                             student -> new StudentDTO(
@@ -92,6 +94,51 @@ public class ClassServiceFacade {
             );
         }
         classFacade.edit(classInQuestion, operatedBy);
+    }
+
+    public List<ClassEnrollmentDTO> FindEnrollmentsInClass(Long classId) throws ClassException{
+        if(!classFacade.classExists(classId)){
+            throw new ClassException("Class not found");
+        }
+
+        Class classInQuestion = classFacade.find(classId);
+        return classInQuestion.getEnrolledStudents().stream().map(
+                student -> new ClassEnrollmentDTO(
+                        classInQuestion,
+                        student
+                )
+        ).toList();
+    }
+
+    public List<ClassEnrollmentDTO> FindClassesOfStudent(Long studentId) throws ClassException{
+        if(!studentFacade.studentExists(studentId)){
+            throw new ClassException("Student not found");
+        }
+
+        List<Class> classes = classFacade.findClassesOfStudent(studentId);
+        return classes.stream().map(
+                classInQuestion -> {
+                    return new ClassEnrollmentDTO(
+                            classInQuestion,
+                            studentFacade.find(studentId)
+                    );
+                }
+        ).toList();
+    }
+
+    public ClassEnrollmentDTO FindClassEnrollmentByStudentAndClass(Long classId, Long studentId) throws ClassException{
+        if(!classFacade.classExists(classId)){
+            throw new ClassException("Class not found");
+        }
+        if(!studentFacade.studentExists(studentId)){
+            throw new ClassException("Student not found");
+        }
+
+        Class classInQuestion = classFacade.find(classId);
+        return new ClassEnrollmentDTO(
+                classInQuestion,
+                studentFacade.find(studentId)
+        );
     }
 
     public void DeleteClass(Long classId, String operatedBy) throws ClassException{

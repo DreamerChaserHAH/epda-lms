@@ -1,9 +1,8 @@
 package com.htetaung.lms.ejbs.services;
 
 import com.htetaung.lms.ejbs.facades.AssessmentFacade;
-import com.htetaung.lms.ejbs.facades.ClassEnrollmentFacade;
 import com.htetaung.lms.models.Assessment;
-import com.htetaung.lms.models.ClassEnrollment;
+import com.htetaung.lms.models.dto.ClassEnrollmentDTO;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
@@ -21,7 +20,7 @@ public class DeadlineReminderScheduler {
     private AssessmentFacade assessmentFacade;
 
     @EJB
-    private ClassEnrollmentFacade enrollmentFacade;
+    private ClassServiceFacade classServiceFacade;
 
     @EJB
     private NotificationService notificationService;
@@ -75,7 +74,7 @@ public class DeadlineReminderScheduler {
         // This would require linking assessments to classes
         try {
             // Get all active enrollments (simplified - in production, filter by assessment's class)
-            List<ClassEnrollment> enrollments = enrollmentFacade.findAll();
+           /* List<ClassEnrollmentDTO> enrollments = classServiceFacade.findAll();
             
             for (ClassEnrollment enrollment : enrollments) {
                 if (enrollment.getIsActive() && 
@@ -87,7 +86,7 @@ public class DeadlineReminderScheduler {
                         daysRemaining
                     );
                 }
-            }
+            }*/
         } catch (Exception e) {
             System.err.println("Error sending deadline reminders: " + e.getMessage());
         }

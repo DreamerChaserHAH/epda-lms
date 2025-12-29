@@ -1,11 +1,12 @@
 package com.htetaung.lms.servlets;
 
-import com.htetaung.lms.ejbs.facades.ClassEnrollmentFacade;
 import com.htetaung.lms.ejbs.facades.ClassFacade;
 import com.htetaung.lms.ejbs.facades.UserFacade;
-import com.htetaung.lms.models.ClassEntity;
-import com.htetaung.lms.models.ClassEnrollment;
+import com.htetaung.lms.ejbs.services.ClassServiceFacade;
+import com.htetaung.lms.models.Class;
 import com.htetaung.lms.models.User;
+import com.htetaung.lms.models.dto.ClassDTO;
+import com.htetaung.lms.models.dto.ClassEnrollmentDTO;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,10 +22,7 @@ import java.util.List;
 public class ClassEnrollmentServlet extends HttpServlet {
 
     @EJB
-    private ClassEnrollmentFacade enrollmentFacade;
-
-    @EJB
-    private ClassFacade classFacade;
+    private ClassServiceFacade classFacade;
 
     @EJB
     private UserFacade userFacade;
@@ -40,25 +38,25 @@ public class ClassEnrollmentServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 if (classIdParam != null) {
                     Long classId = Long.parseLong(classIdParam);
-                    List<ClassEnrollment> enrollments = enrollmentFacade.findByClassId(classId);
+                    List<ClassEnrollmentDTO> enrollments = classFacade.FindEnrollmentsInClass(classId);
                     sendJsonResponse(response, enrollments, HttpServletResponse.SC_OK);
                 } else if (studentIdParam != null) {
                     Long studentId = Long.parseLong(studentIdParam);
-                    List<ClassEnrollment> enrollments = enrollmentFacade.findByStudentId(studentId);
+                    List<ClassEnrollmentDTO> enrollments = classFacade.FindClassesOfStudent(studentId);
                     sendJsonResponse(response, enrollments, HttpServletResponse.SC_OK);
                 } else {
                     sendErrorResponse(response, "Missing parameters: classId or studentId", 
                             HttpServletResponse.SC_BAD_REQUEST);
                 }
             } else {
-                String idStr = pathInfo.substring(1);
+                /*String idStr = pathInfo.substring(1);
                 Long id = Long.parseLong(idStr);
-                ClassEnrollment enrollment = enrollmentFacade.find(id);
+                ClassEnrollmentDTO enrollment = enrollmentFacade.find(id);
                 if (enrollment != null) {
                     sendJsonResponse(response, enrollment, HttpServletResponse.SC_OK);
                 } else {
                     sendErrorResponse(response, "Enrollment not found", HttpServletResponse.SC_NOT_FOUND);
-                }
+                }*/
             }
         } catch (Exception e) {
             sendErrorResponse(response, "Error retrieving enrollments: " + e.getMessage(), 
@@ -88,7 +86,7 @@ public class ClassEnrollmentServlet extends HttpServlet {
             Long classId = Long.parseLong(classIdStr);
             Long studentId = Long.parseLong(studentIdStr);
 
-            ClassEntity classEntity = classFacade.find(classId);
+            ClassDTO classEntity = classFacade.GetClass(classId);
             User student = userFacade.find(studentId);
 
             if (classEntity == null || student == null) {
@@ -97,16 +95,16 @@ public class ClassEnrollmentServlet extends HttpServlet {
             }
 
             // Check if already enrolled
-            ClassEnrollment existing = enrollmentFacade.findByClassAndStudent(classId, studentId);
+            ClassEnrollmentDTO existing = classFacade.FindClassEnrollmentByStudentAndClass(classId, studentId);
             if (existing != null) {
                 sendErrorResponse(response, "Student is already enrolled in this class", 
                         HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
-            ClassEnrollment enrollment = new ClassEnrollment(classEntity, student);
-            enrollmentFacade.create(enrollment, student.getUsername());
-            sendJsonResponse(response, enrollment, HttpServletResponse.SC_CREATED);
+            //ClassEnrollment enrollment = new ClassEnrollment(classEntity, student);
+            //enrollmentFacade.create(enrollment, student.getUsername());
+            //sendJsonResponse(response, enrollment, HttpServletResponse.SC_CREATED);
         } catch (Exception e) {
             sendErrorResponse(response, "Error creating enrollment: " + e.getMessage(), 
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -130,7 +128,7 @@ public class ClassEnrollmentServlet extends HttpServlet {
     }
 
     private String convertToJson(Object obj) {
-        if (obj instanceof ClassEnrollment) {
+        /*if (obj instanceof ClassEnrollment) {
             ClassEnrollment e = (ClassEnrollment) obj;
             StringBuilder json = new StringBuilder("{");
             json.append("\"id\":").append(e.getId()).append(",");
@@ -152,7 +150,7 @@ public class ClassEnrollmentServlet extends HttpServlet {
             }
             json.append("]");
             return json.toString();
-        }
+        }*/
         return "{}";
     }
 

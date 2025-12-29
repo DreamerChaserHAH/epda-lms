@@ -1,11 +1,10 @@
 package com.htetaung.lms.servlets;
 
 import com.htetaung.lms.ejbs.facades.AttendanceFacade;
-import com.htetaung.lms.ejbs.facades.ClassEnrollmentFacade;
 import com.htetaung.lms.ejbs.facades.ClassFacade;
 import com.htetaung.lms.ejbs.facades.UserFacade;
 import com.htetaung.lms.models.Attendance;
-import com.htetaung.lms.models.ClassEntity;
+import com.htetaung.lms.models.Class;
 import com.htetaung.lms.models.User;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
@@ -29,9 +28,6 @@ public class AttendanceServlet extends HttpServlet {
 
     @EJB
     private ClassFacade classFacade;
-
-    @EJB
-    private ClassEnrollmentFacade enrollmentFacade;
 
     @EJB
     private UserFacade userFacade;
@@ -123,7 +119,7 @@ public class AttendanceServlet extends HttpServlet {
             Long studentId = Long.parseLong(studentIdStr);
             Date date = dateFormat.parse(dateStr);
 
-            ClassEntity classEntity = classFacade.find(classId);
+            Class classEntity = classFacade.find(classId);
             User student = userFacade.find(studentId);
 
             if (classEntity == null || student == null) {
@@ -225,7 +221,7 @@ public class AttendanceServlet extends HttpServlet {
             Attendance a = (Attendance) obj;
             StringBuilder json = new StringBuilder("{");
             json.append("\"id\":").append(a.getId()).append(",");
-            json.append("\"classId\":").append(a.getClassEntity().getId()).append(",");
+            json.append("\"classId\":").append(a.getClassEntity().getClassId()).append(",");
             json.append("\"studentId\":").append(a.getStudent().getUserId()).append(",");
             json.append("\"studentName\":\"").append(escapeJson(a.getStudent().getFullName())).append("\",");
             json.append("\"attendanceDate\":\"").append(dateFormat.format(a.getAttendanceDate())).append("\",");
