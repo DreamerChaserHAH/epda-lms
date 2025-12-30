@@ -52,7 +52,8 @@
 
         <!-- Performance Chart Placeholder -->
         <div class="alert alert-info mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <img src="<%= request.getContextPath() %>/images/icons/info-circle.png"
+                 alt="Info" class="w-6 h-6 shrink-0">
             <div>
                 <h3 class="font-bold">Performance Distribution</h3>
                 <div class="text-xs">Pass Rate: <%= String.format("%.1f", passRate) %>% | Average Score: <%= String.format("%.1f", overallAverage) %>%</div>

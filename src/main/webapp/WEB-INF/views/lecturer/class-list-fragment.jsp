@@ -30,9 +30,8 @@
 
     <% if (classes == null || classes.isEmpty()) { %>
     <div class="alert alert-info shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <img src="<%= contextPath %>/images/icons/info-circle.png"
+             alt="Info" class="h-6 w-6 shrink-0">
         <span class="font-medium">You are not assigned to any classes yet</span>
     </div>
     <% } else { %>
@@ -51,18 +50,16 @@
 
                 <div class="space-y-2 mb-4">
                     <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
+                        <img src="<%= contextPath %>/images/icons/books.png"
+                             alt="Module" class="h-5 w-5">
                         <p class="text-sm text-base-content/80">
                             <span class="font-semibold">Module:</span> <%= classDTO.moduleDTO.moduleName %>
                         </p>
                     </div>
                     <% if (classDTO.moduleDTO.createdBy != null) { %>
                     <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
+                        <img src="<%= contextPath %>/images/icons/profile.png"
+                             alt="Leader" class="h-5 w-5">
                         <p class="text-sm text-base-content/80">
                             <span class="font-semibold">Lead:</span> <%= classDTO.moduleDTO.createdBy.fullname %>
                         </p>
@@ -74,9 +71,8 @@
                     <button class="btn btn-primary btn-sm text-white font-semibold rounded-lg hover:scale-105 transition-transform"
                             onclick="window.location.href='<%= contextPath %>/index.jsp?page=classes&classId=<%= classDTO.classId %>'">
                         View Details
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
+                        <img src="<%= contextPath %>/images/icons/arrow-right.png"
+                             alt="Arrow" class="h-4 w-4 ml-1">
                     </button>
                 </div>
             </div>
