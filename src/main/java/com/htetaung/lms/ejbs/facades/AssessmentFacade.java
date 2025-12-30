@@ -107,4 +107,42 @@ public class AssessmentFacade extends AbstractFacade<Assessment>{
             em.remove(assessment);
         }
     }
+
+    /**
+     * Find assessment by ID with explicit query to ensure ID is properly initialized
+     * This is needed for JOINED inheritance strategy
+     */
+    public Assessment findAssessmentWithId(Long assessmentId) {
+        try {
+            Assessment assessment = em.createQuery("SELECT a FROM Assessment a WHERE a.assessmentId = :id", Assessment.class)
+                    .setParameter("id", assessmentId)
+                    .getSingleResult();
+
+            // Force initialization of the entity to ensure all fields are loaded
+            if (assessment != null) {
+                // Access a field to ensure the entity is fully initialized
+                assessment.getAssessmentName();
+
+                // Verify ID is set
+                if (assessment.getAssessmentId() == null) {
+                    System.err.println("AssessmentFacade: WARNING - Query returned assessment with NULL ID! Using getReference fallback...");
+                    // Try using getReference as fallback
+                    return em.getReference(Assessment.class, assessmentId);
+                }
+
+                // Log for debugging
+                System.out.println("AssessmentFacade: Loaded assessment ID=" + assessment.getAssessmentId() +
+                                 ", Type=" + assessment.getClass().getName());
+            }
+
+            return assessment;
+        } catch (jakarta.persistence.NoResultException e) {
+            System.err.println("AssessmentFacade: No assessment found with ID: " + assessmentId);
+            return null;
+        } catch (Exception e) {
+            System.err.println("AssessmentFacade: Error finding assessment: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -12,6 +12,7 @@ import com.htetaung.lms.models.dto.AssessmentDTO;
 import com.htetaung.lms.models.enums.FileFormats;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,8 +55,6 @@ public class SubmissionServiceFacade {
     @EJB
     private GradingFacade gradingFacade;
 
-    // Base upload directory - adjust as needed
-    private static final String UPLOAD_DIR = System.getProperty("user.home") + "/lms-uploads/assignments/";
 
     /**
      * Submit an assignment with file upload
@@ -96,8 +95,9 @@ public class SubmissionServiceFacade {
             // Determine file format
             FileFormats fileFormat = determineFileFormat(fileName);
 
-            // Create upload directory if it doesn't exist
-            Path uploadPath = Paths.get(UPLOAD_DIR);
+            // Get upload directory path
+            String uploadDir = System.getProperty("jboss.server.data.dir", System.getProperty("user.home")) + "/lms-uploads/assignments/";
+            Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -121,6 +121,7 @@ public class SubmissionServiceFacade {
             FileSubmitted fileSubmitted = new FileSubmitted();
             fileSubmitted.setFileName(fileName);
             fileSubmitted.setFileFormat(fileFormat);
+            // Store absolute path for server-side file access
             fileSubmitted.setFilePath(filePath.toString());
 
             // Create assignment submission
@@ -141,6 +142,164 @@ public class SubmissionServiceFacade {
         } catch (Exception e) {
             throw new SubmissionException("Failed to submit assignment: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Submit an assignment with multiple file uploads
+     */
+    public AssignmentSubmissionDTO SubmitAssignment(
+            Long studentId,
+            Long assessmentId,
+            List<Part> fileParts,
+            String comments,
+            String operatedBy
+    ) throws SubmissionException {
+
+        try {
+            // Validate student exists
+            Student student = studentFacade.find(studentId);
+            if (student == null) {
+                throw new SubmissionException("Student not found with ID: " + studentId);
+            }
+
+            // Validate assessment exists - use explicit query to ensure ID is initialized
+            Assessment assessment = assessmentFacade.findAssessmentWithId(assessmentId);
+            if (assessment == null) {
+                throw new SubmissionException("Assessment not found with ID: " + assessmentId);
+            }
+
+            // Debug: Log assessment details
+            System.out.println("DEBUG: Assessment found - ID: " + assessment.getAssessmentId() +
+                             ", Type: " + assessment.getClass().getName() +
+                             ", Name: " + assessment.getAssessmentName());
+
+            // Check if already submitted
+            Submission existingSubmission = submissionFacade.findByStudentAndAssessment(studentId, assessmentId);
+            if (existingSubmission != null) {
+                throw new SubmissionException("You have already submitted this assignment");
+            }
+
+            // Validate files
+            if (fileParts == null || fileParts.isEmpty()) {
+                throw new SubmissionException("At least one file is required for assignment submission");
+            }
+
+            // Validate assignment type and allowed formats
+            if (!(assessment instanceof Assignment)) {
+                throw new SubmissionException("Assessment is not an assignment");
+            }
+
+            Assignment assignmentAssessment = (Assignment) assessment;
+            List<FileFormats> allowedFormats = assignmentAssessment.getAllowedFileFormat();
+
+            // CRITICAL: Verify assessment ID is set - this is required for the database
+            if (assessment.getAssessmentId() == null) {
+                System.err.println("ERROR: Assessment ID is NULL after query! Assessment object: " + assessment);
+                System.err.println("ERROR: Assessment type: " + assessment.getClass().getName());
+                throw new SubmissionException("Assessment ID is null after fetching - database integrity issue");
+            }
+
+            // Extra safety: Verify the assignment also has the ID
+            if (assignmentAssessment.getAssessmentId() == null) {
+                System.err.println("ERROR: Assignment (cast) ID is NULL! Setting from parameter...");
+                // Last resort: manually set the ID from the parameter
+                assignmentAssessment.setAssessmentId(assessmentId);
+            }
+
+            // Get upload directory path
+            String uploadDir = System.getProperty("jboss.server.data.dir", System.getProperty("user.home")) + "/lms-uploads/assignments/";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Process and save all files
+            List<FileSubmitted> filesSubmitted = new ArrayList<>();
+
+            for (Part filePart : fileParts) {
+                String fileName = getFileName(filePart);
+
+                // Determine file format
+                FileFormats fileFormat = determineFileFormat(fileName);
+
+                // Validate file format if allowed formats are specified
+                if (allowedFormats != null && !allowedFormats.isEmpty()) {
+                    if (!allowedFormats.contains(fileFormat)) {
+                        String allowedFormatsStr = allowedFormats.stream()
+                            .map(FileFormats::name)
+                            .collect(java.util.stream.Collectors.joining(", "));
+                        throw new SubmissionException(
+                            "File '" + fileName + "' has format " + fileFormat.name() +
+                            " which is not allowed for this assignment.\nAllowed formats: " + allowedFormatsStr
+                        );
+                    }
+                }
+
+                // Generate unique filename
+                String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
+                Path filePath = uploadPath.resolve(uniqueFileName);
+
+                // Save file to disk
+                try (InputStream fileInputStream = filePart.getInputStream()) {
+                    Files.copy(fileInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                // Create file submitted record
+                FileSubmitted fileSubmitted = new FileSubmitted();
+                fileSubmitted.setFileName(fileName);
+                fileSubmitted.setFileFormat(fileFormat);
+                // Store absolute path for server-side file access
+                fileSubmitted.setFilePath(filePath.toString());
+
+                filesSubmitted.add(fileSubmitted);
+            }
+
+            // Create initial feedback (no score yet)
+            Feedback feedback = null;
+
+            // Create submission with assessment reference
+            // CRITICAL FIX: Get a fresh managed reference to ensure proper persistence
+            Assessment managedAssessment = assessmentFacade.find(assessmentId);
+            if (managedAssessment == null || managedAssessment.getAssessmentId() == null) {
+                System.err.println("CRITICAL ERROR: Cannot get managed assessment for ID: " + assessmentId);
+                throw new SubmissionException("Cannot create submission - assessment reference is invalid");
+            }
+
+            System.out.println("DEBUG: Creating submission with managed assessment ID: " + managedAssessment.getAssessmentId());
+            Submission submission = new Submission(feedback, student, managedAssessment);
+            //submissionFacade.create(submission, operatedBy);
+
+            // Create assignment submission
+            AssignmentSubmission assignmentSubmission = new AssignmentSubmission(submission, filesSubmitted);
+            assignmentSubmission.setAssessment(assessment);
+
+            // Set bi-directional relationship for all files
+            for (FileSubmitted file : filesSubmitted) {
+                file.setAssignmentSubmission(assignmentSubmission);
+            }
+
+            assignmentSubmissionFacade.create(assignmentSubmission, operatedBy);
+
+            return new AssignmentSubmissionDTO(assignmentSubmission);
+
+        } catch (IOException e) {
+            throw new SubmissionException("Failed to save file: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new SubmissionException("Failed to submit assignment: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Extract filename from Part
+     */
+    private String getFileName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        for (String content : contentDisposition.split(";")) {
+            if (content.trim().startsWith("filename")) {
+                return content.substring(content.indexOf('=') + 1).trim().replace("\"", "");
+            }
+        }
+        return "unknown_" + System.currentTimeMillis();
     }
 
     /**
@@ -307,11 +466,28 @@ public class SubmissionServiceFacade {
      * Determine file format from filename
      */
     private FileFormats determineFileFormat(String fileName) throws SubmissionException {
+        if (fileName == null || !fileName.contains(".")) {
+            throw new SubmissionException("Invalid file name: no extension found");
+        }
+
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toUpperCase();
-        try {
-            return FileFormats.valueOf(extension);
-        } catch (IllegalArgumentException e) {
-            throw new SubmissionException("Unsupported file format: " + extension);
+
+        // Handle common variations
+        switch (extension) {
+            case "PDF":
+                return FileFormats.PDF;
+            case "DOC":
+            case "DOCX":
+                return FileFormats.DOCX;
+            case "TXT":
+                return FileFormats.TXT;
+            case "ZIP":
+                return FileFormats.ZIP;
+            case "RAR":
+                return FileFormats.RAR;
+            default:
+                throw new SubmissionException("Unsupported file format: ." + extension.toLowerCase() +
+                    ". Supported formats are: PDF, DOC, DOCX, TXT, ZIP, RAR");
         }
     }
 
