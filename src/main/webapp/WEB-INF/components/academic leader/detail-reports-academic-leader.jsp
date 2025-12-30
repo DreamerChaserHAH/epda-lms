@@ -10,8 +10,8 @@
     if (reportType == null) reportType = "overview";
 
     // Fetch report data if not already loaded
-    request.setAttribute("includingPage", "/WEB-INF/components/admin/reports.jsp");
-    request.getRequestDispatcher("/api/admin-reports?type=" + reportType).include(request, response);
+    request.setAttribute("includingPage", "/WEB-INF/components/academic leader/detail-reports-academic-leader.jsp");
+    request.getRequestDispatcher("/api/academic-leader-detail-reports?type=" + reportType).include(request, response);
 %>
-<jsp:include page="../../views/admin/reports-view.jsp"/>
+<jsp:include page="../../views/academic-leader/reports-detail-view.jsp"/>
 

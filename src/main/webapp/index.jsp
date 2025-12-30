@@ -32,19 +32,19 @@
     Page[] availablePages;
     switch (role) {
         case ADMIN:
-            //availablePages = new String[]{ "Users", "Modules", "Classes", "Grading Reports"};
+            //availablePages = new String[]{ "Users", "Modules", "Classes", "Grading"};
             availablePages = new Page[]{
                     new Page("Users", "users", "users.png"),
                     new Page("Lecturers", "lecturer-assignment", "assign.png"),
                     new Page("Classes", "classes", "classes.png"),
-                    new Page("Grading System", "grading", "reports.png")
+                    new Page("Grading System", "grading", "settings.png")
             };
             break;
         case ACADEMIC_LEADER:
-            //availablePages = new String[]{ "Modules", "Assign Lecturers"};
+            //availablePages = new String[]{ "Modules", "Reports"};
             availablePages = new Page[]{
                     new Page("Modules", "modules", "books.png"),
-                    new Page("Assign Lecturers", "assign_lecturers", "assign.png")
+                    new Page("Reports", "reports-academic-leader", "reports.png")
             };
             break;
         case LECTURER:
@@ -108,7 +108,7 @@
         <aside class="w-64 bg-white shadow-lg flex flex-col">
             <!-- Logo/Brand -->
             <div class="p-6 border-b">
-                <h1 class="text-2xl font-bold text-primary">APU AMS</h1>
+                <h1 class="text-2xl font-bold text-primary">APU LMS</h1>
             </div>
             
             <!-- Navigation Menu -->

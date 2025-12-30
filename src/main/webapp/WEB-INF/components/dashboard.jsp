@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: victor
-  Date: 12/23/25
-  Time: 3:29 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     // Check if this JSP is being included
@@ -18,12 +11,27 @@
         return;
     }
 
-    String username = (String) session.getAttribute("username");
     String role = session.getAttribute("role") != null ?
             session.getAttribute("role").toString() : "STUDENT";
+
+    // Redirect to role-specific dashboard
+    String dashboardPath = "";
+    switch (role) {
+        case "ADMIN":
+            dashboardPath = "/WEB-INF/components/admin/dashboard.jsp";
+            break;
+        case "ACADEMIC_LEADER":
+            dashboardPath = "/WEB-INF/components/academic leader/dashboard.jsp";
+            break;
+        case "LECTURER":
+            dashboardPath = "/WEB-INF/components/lecturer/dashboard.jsp";
+            break;
+        case "STUDENT":
+            dashboardPath = "/WEB-INF/components/student/dashboard.jsp";
+            break;
+        default:
+            dashboardPath = "/WEB-INF/components/student/dashboard.jsp";
+    }
 %>
-<div class="navbar bg-white shadow-sm">
-    <div class="flex-1">
-        <span class="text-xl font-semibold">Welcome, <%= username %></span>
-    </div>
-</div>
+<jsp:include page="<%= dashboardPath %>"/>
+
