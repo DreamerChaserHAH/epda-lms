@@ -1,5 +1,6 @@
 package com.htetaung.lms.models;
 
+import com.htetaung.lms.models.assessments.Assessment;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,9 @@ public class Class {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<Student> enrolledStudents = new ArrayList<>();
+
+    @OneToMany(mappedBy = "relatedClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Assessment> assessments = new ArrayList<>(); // All assessments for this class
 
     public Class(Module module, String className) {
         this.module = module;

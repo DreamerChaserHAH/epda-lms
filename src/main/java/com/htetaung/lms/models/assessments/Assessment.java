@@ -57,6 +57,10 @@ public class Assessment {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     private List<Student> visibleToStudents; /// can be empty if visibility is PUBLIC
+
+    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Submission> submissions; // All submissions for this assessment
+
     public Assessment(
             String assessmentName,
             String assessmentDescription,

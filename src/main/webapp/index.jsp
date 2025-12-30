@@ -56,7 +56,7 @@
         case STUDENT:
             availablePages = new Page[] {
                     new Page("Assignments", "assignments", "assign.png"),
-                    new Page("My Results", "my_results", "results.png"),
+                    new Page("My Results", "results", "results.png"),
                     new Page("Calendar", "calendar", "calendar.png")
             };
             break;

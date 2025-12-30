@@ -3,6 +3,7 @@ package com.htetaung.lms.servlets;
 import com.htetaung.lms.ejbs.facades.StudentFacade;
 import com.htetaung.lms.ejbs.services.ClassServiceFacade;
 import com.htetaung.lms.ejbs.services.ModuleServiceFacade;
+import com.htetaung.lms.ejbs.services.SubmissionServiceFacade;
 import com.htetaung.lms.ejbs.services.UserServiceFacade;
 import com.htetaung.lms.exception.ClassException;
 import com.htetaung.lms.exception.ModuleException;
@@ -38,6 +39,9 @@ public class ClassServlet extends HttpServlet {
 
     @EJB
     private StudentFacade studentFacade;
+
+    @EJB
+    private SubmissionServiceFacade submissionServiceFacade;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

@@ -27,6 +27,9 @@ public class AssessmentDTO {
     private LecturerDTO createdBy;
     private Visibility visibility;
 
+    // Submission tracking for student view
+    private SubmissionDTO submission;
+
     public AssessmentDTO(Assessment assessment) {
         this.assessmentId = assessment.getAssessmentId();
         this.assessmentName = assessment.getAssessmentName();
@@ -50,5 +53,40 @@ public class AssessmentDTO {
         assessment.setVisibility(this.visibility);
         assessment.setVisibleToStudents(new ArrayList<>());
         return assessment;
+    }
+
+    /**
+     * Convenience method to check if student has submitted
+     */
+    public boolean isHasSubmitted() {
+        return submission != null;
+    }
+
+    /**
+     * Convenience method to get submission ID
+     */
+    public Long getSubmissionId() {
+        return submission != null ? submission.getSubmissionId() : null;
+    }
+
+    /**
+     * Convenience method to get score
+     */
+    public Integer getScore() {
+        return submission != null ? submission.getScore() : null;
+    }
+
+    /**
+     * Convenience method to get feedback text
+     */
+    public String getFeedbackText() {
+        return submission != null ? submission.getFeedbackText() : null;
+    }
+
+    /**
+     * Convenience method to get grade symbol
+     */
+    public String getGradeSymbol() {
+        return submission != null ? submission.getGradeSymbol() : "UNCATEGORIZED";
     }
 }

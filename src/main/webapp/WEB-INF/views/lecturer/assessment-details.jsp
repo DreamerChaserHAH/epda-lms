@@ -1,10 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.htetaung.lms.models.dto.AssessmentDTO" %>
 <%@ page import="com.htetaung.lms.models.dto.StudentDTO" %>
+<%@ page import="com.htetaung.lms.models.dto.SubmissionDTO" %>
 <%@ page import="com.htetaung.lms.models.dto.QuizIndividualQuestionDTO" %>
 <%@ page import="com.htetaung.lms.models.enums.AssessmentType" %>
 <%@ page import="com.htetaung.lms.models.enums.FileFormats" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
 <%
     // Check if this JSP is being included
     if (request.getAttribute("jakarta.servlet.include.request_uri") == null) {
@@ -49,6 +52,22 @@
             return;
         }
         quizQuestions = (List<QuizIndividualQuestionDTO>) request.getAttribute("questions");
+    }
+
+    // Fetch submissions for this assessment
+    if (request.getAttribute("submissions") == null) {
+        request.setAttribute("includingPage", "/WEB-INF/views/lecturer/assessment-details.jsp");
+        request.getRequestDispatcher("/api/submissions?assessmentId=" + assessmentIdString).include(request, response);
+        return;
+    }
+    List<SubmissionDTO> submissions = (List<SubmissionDTO>) request.getAttribute("submissions");
+
+    // Create a map for quick lookup of submissions by student ID
+    Map<Long, SubmissionDTO> submissionMap = new HashMap<>();
+    if (submissions != null) {
+        for (SubmissionDTO sub : submissions) {
+            submissionMap.put(sub.getStudentId(), sub);
+        }
     }
 %>
 
@@ -275,6 +294,67 @@
             </h3>
 
             <% if (students != null && !students.isEmpty()) { %>
+
+            <!-- Submission Statistics -->
+            <%
+                int totalStudents = students.size();
+                int submittedCount = submissions != null ? submissions.size() : 0;
+                int notSubmittedCount = totalStudents - submittedCount;
+                int gradedCount = 0;
+                if (submissions != null) {
+                    for (SubmissionDTO sub : submissions) {
+                        if (sub.getScore() != null && sub.getScore() > 0) {
+                            gradedCount++;
+                        }
+                    }
+                }
+                int notGradedCount = submittedCount - gradedCount;
+            %>
+
+            <div class="stats stats-vertical lg:stats-horizontal shadow mb-6 bg-base-200">
+                <div class="stat">
+                    <div class="stat-figure text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Total Students</div>
+                    <div class="stat-value text-primary"><%= totalStudents %></div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-figure text-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Submitted</div>
+                    <div class="stat-value text-success"><%= submittedCount %></div>
+                    <div class="stat-desc"><%= String.format("%.1f", (submittedCount * 100.0 / totalStudents)) %>%</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-figure text-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Not Graded</div>
+                    <div class="stat-value text-warning"><%= notGradedCount %></div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-figure text-error">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                    <div class="stat-title">Not Submitted</div>
+                    <div class="stat-value text-error"><%= notSubmittedCount %></div>
+                    <div class="stat-desc"><%= String.format("%.1f", (notSubmittedCount * 100.0 / totalStudents)) %>%</div>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="table table-zebra table-pin-rows">
                     <thead>
@@ -290,9 +370,10 @@
                     <%
                         int index = 1;
                         for (StudentDTO student : students) {
-                            // TODO: Check if student has submitted this assessment
-                            boolean hasSubmitted = false;
-                            String submissionId = "";
+                            // Check if student has submitted this assessment
+                            SubmissionDTO studentSubmission = submissionMap.get(student.userId);
+                            boolean hasSubmitted = studentSubmission != null;
+                            Integer score = hasSubmitted && studentSubmission.getScore() != null ? studentSubmission.getScore() : null;
                     %>
                     <tr>
                         <td><%= index++ %></td>
@@ -312,11 +393,22 @@
                         </td>
                         <td class="text-center">
                             <% if (hasSubmitted) { %>
-                            <div class="badge badge-success badge-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Submitted
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="badge badge-success badge-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Submitted
+                                </div>
+                                <% if (score != null) { %>
+                                <div class="badge badge-info badge-sm">
+                                    Score: <%= score %>%
+                                </div>
+                                <% } else { %>
+                                <div class="badge badge-warning badge-sm">
+                                    Not Graded
+                                </div>
+                                <% } %>
                             </div>
                             <% } else { %>
                             <div class="badge badge-error badge-lg">
@@ -329,14 +421,26 @@
                         </td>
                         <td class="text-center">
                             <% if (hasSubmitted) { %>
-                            <a href="<%= contextPath %>/index.jsp?page=submission-details&submissionId=<%= submissionId %>"
-                               class="btn btn-sm btn-info text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                View Submission
-                            </a>
+                            <div class="flex flex-col gap-2">
+                                <a href="<%= contextPath %>/index.jsp?page=view-submission-lecturer&submissionId=<%= studentSubmission.getSubmissionId() %>"
+                                   class="btn btn-sm btn-info text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    View
+                                </a>
+                                <% if (score == null || score == 0) { %>
+                                <button type="button"
+                                        class="btn btn-sm btn-success text-white"
+                                        onclick="openGradeModal('<%= student.fullname %>', <%= studentSubmission.getSubmissionId() %>)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Grade
+                                </button>
+                                <% } %>
+                            </div>
                             <% } else { %>
                             <span class="text-base-content/50">-</span>
                             <% } %>

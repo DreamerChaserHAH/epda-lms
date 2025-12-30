@@ -2,6 +2,7 @@ package com.htetaung.lms.servlets;
 
 import com.htetaung.lms.ejbs.facades.AssessmentFacade;
 import com.htetaung.lms.ejbs.services.AssessmentServiceFacade;
+import com.htetaung.lms.ejbs.services.SubmissionServiceFacade;
 import com.htetaung.lms.models.assessments.Assessment;
 import com.htetaung.lms.models.dto.AssessmentDTO;
 import com.htetaung.lms.models.enums.AssessmentType;
@@ -25,6 +26,9 @@ public class AssessmentServlet extends HttpServlet {
     @EJB
     private AssessmentServiceFacade assessmentServiceFacade;
 
+    @EJB
+    private SubmissionServiceFacade submissionServiceFacade;
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -35,12 +39,19 @@ public class AssessmentServlet extends HttpServlet {
         // GET single assessment by ID
         if (assessmentIdString != null && !assessmentIdString.isEmpty()) {
             Long assessmentId = Long.parseLong(assessmentIdString);
+            String studentIdForEnrichment = RequestParameterProcessor.getStringValue("studentId", request, "");
 
             try {
                 AssessmentDTO assessmentDTO = assessmentServiceFacade.GetAssessment(assessmentId);
                 if (assessmentDTO == null) {
                     MessageModal.DisplayErrorMessage("Assessment Not Found with ID: " + assessmentId, request);
                     return;
+                }
+
+                // If studentId is provided, enrich with submission info
+                if (studentIdForEnrichment != null && !studentIdForEnrichment.isEmpty()) {
+                    Long studentId = Long.parseLong(studentIdForEnrichment);
+                    submissionServiceFacade.EnrichAssessmentWithSubmission(assessmentDTO, studentId);
                 }
 
                 request.setAttribute("assessment", assessmentDTO);
@@ -73,6 +84,8 @@ public class AssessmentServlet extends HttpServlet {
                 if (studentIdString != null && !studentIdString.isEmpty()) {
                     Long studentId = Long.parseLong(studentIdString);
                     assessments = assessmentServiceFacade.ListVisibleAssessmentsForStudent(classId, studentId);
+                    // Enrich with submission information for the student
+                    assessments = assessmentServiceFacade.EnrichWithSubmissionInfo(assessments, studentId);
                 } else {
                     assessments = assessmentServiceFacade.ListAllAssessmentsInClass(classId);
                 }

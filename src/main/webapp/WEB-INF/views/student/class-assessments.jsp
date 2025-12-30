@@ -193,7 +193,7 @@
                 <% for (AssessmentDTO assessment : assessments) {
                     boolean isQuiz = assessment.getAssessmentType().equals(AssessmentType.QUIZ);
                     boolean isOverdue = assessment.getDeadline().before(now);
-                    boolean hasSubmitted = false; // TODO: Check submission status
+                    boolean hasSubmitted = assessment.isHasSubmitted(); // Use actual submission status
 
                     String statusBadgeClass = "";
                     String statusText = "";

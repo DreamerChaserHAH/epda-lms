@@ -45,6 +45,9 @@ public class AssessmentServiceFacade {
     @EJB
     private LecturerFacade lecturerFacade;
 
+    @EJB
+    private SubmissionServiceFacade submissionServiceFacade;
+
     public void CreateAssessment(
             String assessmentName,
             String assessmentDescription,
@@ -181,5 +184,20 @@ public class AssessmentServiceFacade {
             throw new AssessmentException("Assessment not found");
         }
         assessmentFacade.deleteAssessment(assessmentId);
+    }
+
+    /**
+     * Enrich assessment DTOs with submission information for a specific student
+     */
+    public List<AssessmentDTO> EnrichWithSubmissionInfo(List<AssessmentDTO> assessments, Long studentId) {
+        for (AssessmentDTO assessment : assessments) {
+            try {
+                submissionServiceFacade.EnrichAssessmentWithSubmission(assessment, studentId);
+            } catch (Exception e) {
+                // If there's an error, just mark as not submitted
+                assessment.setSubmission(null);
+            }
+        }
+        return assessments;
     }
 }

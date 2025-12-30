@@ -27,8 +27,16 @@
         return;
     }
 
+    // Fetch submission statuses if not already loaded
+    if (request.getAttribute("submissionStatuses") == null && classId_String != null) {
+        request.setAttribute("includingPage", "/WEB-INF/views/lecturer/class-details.jsp");
+        request.getRequestDispatcher("/api/submission-statuses?classId=" + classId_String).include(request, response);
+        return;
+    }
+
     ClassDTO classDTO = (ClassDTO) request.getAttribute("classDetails");
     List<AssessmentDTO> assessments = (List<AssessmentDTO>) request.getAttribute("assessments");
+    java.util.Map<String, Boolean> submissionStatuses = (java.util.Map<String, Boolean>) request.getAttribute("submissionStatuses");
     String contextPath = request.getContextPath();
 
     if (classDTO == null) {
@@ -345,8 +353,9 @@
                         </td>
                         <% if (assessments != null) {
                             for (AssessmentDTO assessment : assessments) {
-                                // TODO: Check if student has submitted this assessment
-                                boolean hasSubmitted = false;
+                                // Check if student has submitted this assessment
+                                String statusKey = student.userId + "_" + assessment.getAssessmentId();
+                                boolean hasSubmitted = submissionStatuses != null && submissionStatuses.getOrDefault(statusKey, false);
                         %>
                         <td class="text-center">
                             <% if (hasSubmitted) { %>
