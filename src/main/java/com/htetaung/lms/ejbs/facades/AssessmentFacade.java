@@ -1,0 +1,83 @@
+package com.htetaung.lms.ejbs.facades;
+
+import com.htetaung.lms.models.Class;
+import com.htetaung.lms.models.Staff;
+import com.htetaung.lms.models.User;
+import com.htetaung.lms.exception.AuthenticationException;
+import com.htetaung.lms.models.assessments.Assessment;
+import com.htetaung.lms.models.dto.AssessmentDTO;
+import com.htetaung.lms.models.enums.AssessmentType;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.List;
+
+@Stateless
+public class AssessmentFacade extends AbstractFacade<Assessment>{
+
+    @PersistenceContext
+    private EntityManager em;
+
+    public static final int PAGE_SIZE = 10;
+
+    public AssessmentFacade() {
+        super(Assessment.class);
+    }
+
+    @Override
+    protected EntityManager getEntityManager() {
+        return em;
+    }
+
+    public AssessmentDTO findAssessmentById(Long assessmentId){
+        Assessment assessment = find(assessmentId);
+        if(assessment != null){
+            return new AssessmentDTO(assessment);
+        }
+        return null;
+    }
+
+    public List<AssessmentDTO> findAssessmentsInClass(Long classId){
+        List<Assessment> assessments = em.createQuery("SELECT a FROM Assessment a WHERE a.relatedClass.classId = :classId", Assessment.class)
+                .setParameter("classId", classId)
+                .getResultList();
+        return assessments.stream().map(AssessmentDTO::new).toList();
+    }
+
+    public List<AssessmentDTO> findAssessmentsByType(Long classId, AssessmentType assessmentType) {
+        List<Assessment> assessments = em.createQuery("SELECT a FROM Assessment a WHERE a.relatedClass.classId = :classId AND a.assessmentType = :assessmentType", Assessment.class)
+                .setParameter("classId", classId)
+                .setParameter("assessmentType", assessmentType)
+                .getResultList();
+        return assessments.stream().map(AssessmentDTO::new).toList();
+    }
+
+    public List<AssessmentDTO> findAssessmentsByVisibility(Long classId, String visibility) {
+        List<Assessment> assessments = em.createQuery("SELECT a FROM Assessment a WHERE a.relatedClass.classId = :classId AND a.visibility = :visibility", Assessment.class)
+                .setParameter("classId", classId)
+                .setParameter("visibility", visibility)
+                .getResultList();
+        return assessments.stream().map(AssessmentDTO::new).toList();
+    }
+
+    public boolean assessmentExists(Long assessmentId){
+        Assessment assessment = find(assessmentId);
+        return assessment != null;
+    }
+
+    public Assessment updateAssessment(AssessmentDTO assessmentDTO){
+        return em.merge(assessmentDTO.toAssessment());
+    }
+
+    public void deleteAssessment(Long assessmentId){
+        Assessment assessment = find(assessmentId);
+        if(assessment != null){
+            em.remove(assessment);
+        }
+    }
+}

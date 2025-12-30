@@ -23,4 +23,16 @@ public class LecturerDTO {
         this.fullname = lecturer.getFullName();
         this.academicLeaderUserId = lecturer.getAcademicLeader() != null ? lecturer.getAcademicLeader().getUserId() : null;
     }
+
+    public Lecturer toLecturer(){
+        Lecturer lecturer = new Lecturer();
+        lecturer.setUserId(this.userId);
+        lecturer.setFullName(this.fullname);
+        if(this.academicLeaderUserId != null){
+            AcademicLeader academicLeader = new AcademicLeader();
+            academicLeader.setUserId(this.academicLeaderUserId);
+            lecturer.setAcademicLeader(academicLeader);
+        }
+        return lecturer;
+    }
 }

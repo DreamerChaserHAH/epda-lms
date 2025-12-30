@@ -50,7 +50,7 @@
         case LECTURER:
             //availablePages = new String[]{ "Modules"};
             availablePages = new Page[]{
-                    new Page("Modules", "modules", "books.png"),
+                    new Page("Classes", "classes", "classes.png"),
             };
             break;
         case STUDENT:

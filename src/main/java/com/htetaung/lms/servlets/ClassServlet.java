@@ -68,13 +68,6 @@ public class ClassServlet extends HttpServlet {
 
                 request.setAttribute("availableStudents", availableStudents);
 
-                /// remove students that are already in the classDetail from the class
-
-
-                // Optional: Get available students not in this class
-                // List<StudentDTO> availableStudents = userServiceFacade.GetStudentsNotInClass(classId);
-                // request.setAttribute("availableStudents", availableStudents);
-
                 request.getSession().setAttribute("messageType", "SUCCESS");
                 request.getSession().setAttribute("messageContent", "Class details loaded successfully!");
 
@@ -86,39 +79,56 @@ public class ClassServlet extends HttpServlet {
                 request.getSession().setAttribute("messageContent", "Exception: " + e.getMessage());
             }
         } else {
+            // Check for lecturerId parameter (NEW - for listing classes under lecturer)
+            String lecturerId_String = RequestParameterProcessor.getStringValue("lecturerId", request, null);
 
-            // Check for leaderId parameter (for module/class listing)
-            String academicLeaderId_String = RequestParameterProcessor.getStringValue("leaderId", request, null);
-            if (academicLeaderId_String != null && !academicLeaderId_String.isEmpty()) {
+            if (lecturerId_String != null && !lecturerId_String.isEmpty()) {
                 try {
-                    Long academicLeaderId = Long.parseLong(academicLeaderId_String);
-                    List<ModuleDTO> modules = moduleServiceFacade.ListAllModulesUnderAcademicLeader(academicLeaderId, 1);
-                    request.setAttribute("modules", modules);
-                    int numberOfModules = modules.size();
-                    HashMap<ModuleDTO, List<ClassDTO>> moduleClassesMap = new HashMap<>();
-                    for (int i = 0; i < numberOfModules; i++) {
-                        Long moduleId = modules.get(i).moduleId;
-                        List<ClassDTO> classDTOs = classServiceFacade.ListAllClassesUnderModule(moduleId);
-                        moduleClassesMap.put(modules.get(i), classDTOs);
-                    }
-                    request.setAttribute("moduleClassesMap", moduleClassesMap);
+                    Long lecturerId = Long.parseLong(lecturerId_String);
+                    List<ClassDTO> classes = classServiceFacade.ListAllClassesUnderLecturer(lecturerId);
+                    request.setAttribute("classes", classes);
 
                     request.getSession().setAttribute("messageType", "SUCCESS");
-                    request.getSession().setAttribute("messageContent", "Modules of the Academic Leader loaded successfully!");
+                    request.getSession().setAttribute("messageContent", "Classes under lecturer loaded successfully!");
 
                 } catch (NumberFormatException e) {
                     request.getSession().setAttribute("messageType", "ERROR");
-                    request.getSession().setAttribute("messageContent", "Invalid Academic Leader ID format");
-                } catch (ModuleException e) {
-                    request.getSession().setAttribute("messageType", "ERROR");
-                    request.getSession().setAttribute("messageContent", "Exception: " + e.getMessage());
+                    request.getSession().setAttribute("messageContent", "Invalid Lecturer ID format");
                 } catch (ClassException e) {
                     request.getSession().setAttribute("messageType", "ERROR");
                     request.getSession().setAttribute("messageContent", "Exception: " + e.getMessage());
                 }
             } else {
-                request.getSession().setAttribute("messageType", "ERROR");
-                request.getSession().setAttribute("messageContent", "Academic Leader ID is required");
+                // Check for leaderId parameter (for module/class listing)
+                String academicLeaderId_String = RequestParameterProcessor.getStringValue("leaderId", request, null);
+                if (academicLeaderId_String != null && !academicLeaderId_String.isEmpty()) {
+                    try {
+                        Long academicLeaderId = Long.parseLong(academicLeaderId_String);
+                        List<ModuleDTO> modules = moduleServiceFacade.ListAllModulesUnderAcademicLeader(academicLeaderId, 1);
+                        request.setAttribute("modules", modules);
+                        int numberOfModules = modules.size();
+                        HashMap<ModuleDTO, List<ClassDTO>> moduleClassesMap = new HashMap<>();
+                        for (int i = 0; i < numberOfModules; i++) {
+                            Long moduleId = modules.get(i).moduleId;
+                            List<ClassDTO> classDTOs = classServiceFacade.ListAllClassesUnderModule(moduleId);
+                            moduleClassesMap.put(modules.get(i), classDTOs);
+                        }
+                        request.setAttribute("moduleClassesMap", moduleClassesMap);
+
+                        request.getSession().setAttribute("messageType", "SUCCESS");
+                        request.getSession().setAttribute("messageContent", "Modules of the Academic Leader loaded successfully!");
+
+                    } catch (NumberFormatException e) {
+                        request.getSession().setAttribute("messageType", "ERROR");
+                        request.getSession().setAttribute("messageContent", "Invalid Academic Leader ID format");
+                    } catch (ModuleException | ClassException e) {
+                        request.getSession().setAttribute("messageType", "ERROR");
+                        request.getSession().setAttribute("messageContent", "Exception: " + e.getMessage());
+                    }
+                } else {
+                    request.getSession().setAttribute("messageType", "ERROR");
+                    request.getSession().setAttribute("messageContent", "Class ID, Lecturer ID, or Academic Leader ID is required");
+                }
             }
         }
 
@@ -132,6 +142,7 @@ public class ClassServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/admin/classes-fragment.jsp").include(request, response);
         }
     }
+
 
 
     @Override

@@ -22,4 +22,11 @@ public class AcademicLeaderDTO {
         this.fullname = academicLeader.getFullName();
         this.numberOfLecturerInCharge = 0L;
     }
+
+    public AcademicLeader toAcademicLeader(){
+        AcademicLeader academicLeader = new AcademicLeader();
+        academicLeader.setUserId(this.userId);
+        academicLeader.setFullName(this.fullname);
+        return academicLeader;
+    }
 }

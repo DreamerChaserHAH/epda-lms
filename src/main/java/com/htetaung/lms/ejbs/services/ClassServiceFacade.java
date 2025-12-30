@@ -74,6 +74,42 @@ public class ClassServiceFacade {
         ).toList();
     }
 
+    public List<ClassDTO> ListAllClassesUnderLecturer(Long lecturerId) throws ClassException {
+        List<Module> modules = moduleFacade.listAllModulesUnderLecturer(lecturerId, 1);
+        if (modules.isEmpty()) {
+            throw new ClassException("No modules found under this lecturer");
+        }
+
+        List<ClassDTO> allClasses = new java.util.ArrayList<>();
+
+        for (Module m : modules) {
+            // Check if classes exist for THIS module (not lecturer ID)
+            if (classFacade.classExists(m.getModuleId())) {
+                // Get classes for THIS module (not lecturer ID)
+                List<Class> classes = classFacade.listAllClassesUnderModule(m.getModuleId());
+
+                List<ClassDTO> classDTOs = classes.stream().map(
+                        classInQuestion -> {
+                            try {
+                                return GetClass(classInQuestion.getClassId());
+                            } catch (ClassException | ModuleException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                ).toList();
+
+                allClasses.addAll(classDTOs);
+            }
+        }
+
+        if (allClasses.isEmpty()) {
+            throw new ClassException("No classes found under this lecturer");
+        }
+
+        return allClasses;
+    }
+
+
     public void UpdateClass(Long classId, String className, List<StudentDTO> newStudents, List<StudentDTO> studentsToRemove, String operatedBy) throws ClassException{
         if(!classFacade.classExists(classId)){
             throw new ClassException("Class not found");

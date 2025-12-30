@@ -30,8 +30,6 @@ public class ModuleServiceFacade {
 
     @EJB
     private UserFacade userFacade;
-
-
     public void CreateModule(String moduleName, Long academicLeaderId, Long lecturerId, String operatedBy) throws ModuleException {
         if(academicLeaderId == null || academicLeaderId <= 0) {
             throw new ModuleException("Academic Leader is required");
@@ -57,6 +55,22 @@ public class ModuleServiceFacade {
             throw new ModuleException("Academic Leader not found");
         }
         List<Module> modules = moduleFacade.listAllModulesUnderAcademicLeader(academicLeaderId, page);
+        return modules.stream().map(
+                m -> new ModuleDTO(
+                        m.getModuleId(),
+                        m.getModuleName(),
+                        new AcademicLeaderDTO(m.getCreatedBy()),
+                        m.getManagedBy() != null ? new LecturerDTO(m.getManagedBy()) : null
+                )
+        ).toList();
+    }
+
+    public List<ModuleDTO> ListAllModulesUnderLecturer(Long lecturerId, int page) throws ModuleException {
+        Lecturer lecturer = lecturerFacade.find(lecturerId);
+        if(lecturer == null) {
+            throw new ModuleException("Lecturer not found");
+        }
+        List<Module> modules = moduleFacade.listAllModulesUnderLecturer(lecturerId, page);
         return modules.stream().map(
                 m -> new ModuleDTO(
                         m.getModuleId(),

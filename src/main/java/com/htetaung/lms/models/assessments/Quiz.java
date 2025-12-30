@@ -2,11 +2,13 @@ package com.htetaung.lms.models.assessments;
 
 import com.htetaung.lms.models.assessments.Assessment;
 import com.htetaung.lms.models.assessments.QuizIndividualQuestion;
+import com.htetaung.lms.models.enums.AssessmentType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name="assessment_id")
 public class Quiz extends Assessment {
     @Column(name="time_limit", nullable = false)
-    private LocalDateTime timeLimit;
+    private Duration timeLimit;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
@@ -29,13 +31,13 @@ public class Quiz extends Assessment {
     )
     private List<QuizIndividualQuestion> questions = new ArrayList<>();
 
-    public Quiz(Assessment assessment, LocalDateTime timeLimit) {
+    public Quiz(Assessment assessment, Duration timeLimit) {
         super(
                 assessment.getAssessmentName(),
                 assessment.getAssessmentDescription(),
                 assessment.getRelatedClass(),
                 assessment.getDeadline(),
-                assessment.getAssessmentType(),
+                AssessmentType.QUIZ,
                 assessment.getCreatedBy(),
                 assessment.getVisibility(),
                 assessment.getVisibleToStudents()

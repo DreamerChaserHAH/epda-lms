@@ -1,5 +1,6 @@
 package com.htetaung.lms.models.assessments;
 
+import com.htetaung.lms.models.enums.AssessmentType;
 import com.htetaung.lms.models.enums.FileFormats;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -35,7 +36,7 @@ public class Assignment extends Assessment{
                 assessment.getAssessmentDescription(),
                 assessment.getRelatedClass(),
                 assessment.getDeadline(),
-                assessment.getAssessmentType(),
+                AssessmentType.ASSIGNMENT,
                 assessment.getCreatedBy(),
                 assessment.getVisibility(),
                 assessment.getVisibleToStudents()
