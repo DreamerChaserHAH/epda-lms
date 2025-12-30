@@ -14,9 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-@WebServlet(name = "assignmentSubmissionServlet", urlPatterns = {"/api/submissions"})
+@WebServlet(name = "assignmentSubmissionServlet", urlPatterns = {"/api/submit-assignment"})
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
         maxFileSize = 1024 * 1024 * 10,       // 10MB
@@ -67,48 +66,63 @@ public class AssignmentSubmissionServlet extends HttpServlet {
                 return;
             }
 
-            // Get uploaded file
-            Part filePart = request.getPart("submissionFile");
-            if (filePart == null || filePart.getSize() == 0) {
-                MessageModal.DisplayErrorMessage("File is required for submission", request);
+            // Get all uploaded file parts
+            java.util.Collection<Part> fileParts = request.getParts();
+            java.util.List<Part> submissionFiles = new java.util.ArrayList<>();
+
+            for (Part part : fileParts) {
+                if (part.getName().equals("submissionFiles") && part.getSize() > 0) {
+                    submissionFiles.add(part);
+                }
+            }
+
+            if (submissionFiles.isEmpty()) {
+                MessageModal.DisplayErrorMessage("At least one file is required for submission", request);
                 response.sendRedirect(request.getContextPath() + "/index.jsp?page=submit-assessment&assessmentId=" + assessmentIdStr);
                 return;
             }
 
-            // Validate file size (10MB)
+            // Validate file sizes (10MB each)
             long maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
-            if (filePart.getSize() > maxFileSize) {
-                MessageModal.DisplayErrorMessage("File size exceeds 10MB limit", request);
-                response.sendRedirect(request.getContextPath() + "/index.jsp?page=submit-assessment&assessmentId=" + assessmentIdStr);
-                return;
+            for (Part filePart : submissionFiles) {
+                if (filePart.getSize() > maxFileSize) {
+                    MessageModal.DisplayErrorMessage("File size exceeds 10MB limit: " + getFileName(filePart), request);
+                    response.sendRedirect(request.getContextPath() + "/index.jsp?page=submit-assessment&assessmentId=" + assessmentIdStr);
+                    return;
+                }
             }
 
             // Parse parameters
             Long studentId = Long.parseLong(studentIdStr);
             Long assessmentId = Long.parseLong(assessmentIdStr);
-            String fileName = getFileName(filePart);
 
-            // Get file input stream
-            InputStream fileInputStream = filePart.getInputStream();
-
-            // Submit assignment
+            // Submit assignment with multiple files
             AssignmentSubmissionDTO submission = submissionServiceFacade.SubmitAssignment(
                     studentId,
                     assessmentId,
-                    fileInputStream,
-                    fileName,
+                    submissionFiles,
                     comments,
                     username
             );
 
-            MessageModal.DisplaySuccessMessage("Assignment submitted successfully!", request);
+            if (submission != null && submission.getSubmissionId() != null) {
+                MessageModal.DisplaySuccessMessage(
+                    "Assignment submitted successfully! " + submissionFiles.size() + " file(s) uploaded. Submission ID: " + submission.getSubmissionId(),
+                    request
+                );
+            } else {
+                MessageModal.DisplayWarningMessage("Assignment may not have been saved properly. Please check your submissions.", request);
+            }
 
         } catch (NumberFormatException e) {
             MessageModal.DisplayErrorMessage("Invalid number format: " + e.getMessage(), request);
+            e.printStackTrace();
         } catch (SubmissionException e) {
             MessageModal.DisplayErrorMessage("Submission failed: " + e.getMessage(), request);
+            e.printStackTrace();
         } catch (Exception e) {
             MessageModal.DisplayErrorMessage("Unexpected error: " + e.getMessage(), request);
+            e.printStackTrace();
         }
 
         // Redirect back to assignments page

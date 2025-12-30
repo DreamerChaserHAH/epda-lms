@@ -4,7 +4,9 @@ import com.htetaung.lms.models.Class;
 import com.htetaung.lms.models.Lecturer;
 import com.htetaung.lms.models.Student;
 import com.htetaung.lms.models.assessments.Assessment;
+import com.htetaung.lms.models.assessments.Assignment;
 import com.htetaung.lms.models.enums.AssessmentType;
+import com.htetaung.lms.models.enums.FileFormats;
 import com.htetaung.lms.models.enums.Visibility;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,6 +15,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,6 +30,13 @@ public class AssessmentDTO {
     private LecturerDTO createdBy;
     private Visibility visibility;
 
+    // Assignment-specific fields
+    private List<FileFormats> allowedFileFormats; // For assignments only
+
+    // Additional display fields
+    private String className; // For convenient display without full class object
+    private String instructions; // Assessment instructions
+
     // Submission tracking for student view
     private SubmissionDTO submission;
 
@@ -34,11 +44,19 @@ public class AssessmentDTO {
         this.assessmentId = assessment.getAssessmentId();
         this.assessmentName = assessment.getAssessmentName();
         this.assessmentDescription = assessment.getAssessmentDescription();
+        this.instructions = assessment.getAssessmentDescription(); // Map for convenient access
         this.relatedClass = new ClassDTO(assessment.getRelatedClass());
+        this.className = assessment.getRelatedClass() != null ? assessment.getRelatedClass().getClassName() : null;
         this.deadline = assessment.getDeadline();
         this.assessmentType = assessment.getAssessmentType();
         this.createdBy = new LecturerDTO(assessment.getCreatedBy());
         this.visibility = assessment.getVisibility();
+
+        // Populate allowed file formats if this is an Assignment
+        if (assessment instanceof Assignment) {
+            Assignment assignment = (Assignment) assessment;
+            this.allowedFileFormats = assignment.getAllowedFileFormat();
+        }
     }
 
     public Assessment toAssessment(){

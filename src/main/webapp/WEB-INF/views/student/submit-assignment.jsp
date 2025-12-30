@@ -94,28 +94,59 @@
                         Submit Your Work
                     </h3>
 
-                    <form action="<%= contextPath %>/api/submissions" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <form action="<%= contextPath %>/api/submit-assignment" method="POST" enctype="multipart/form-data" class="space-y-6">
                         <input type="hidden" name="assessmentId" value="<%= assessment.getAssessmentId() %>">
                         <input type="hidden" name="studentId" value="<%= studentId %>">
 
                         <!-- File Upload Section -->
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text font-semibold text-lg">Upload Your File <span class="text-error">*</span></span>
+                                <span class="label-text font-semibold text-lg">Upload Your Files <span class="text-error">*</span></span>
                             </label>
                             <input type="file"
-                                   name="submissionFile"
+                                   name="submissionFiles"
                                    class="file-input file-input-bordered file-input-primary w-full"
                                    required
-                                   accept=".pdf,.doc,.docx,.txt,.zip,.rar">
+                                   multiple
+                                   id="fileInput"
+                                   accept="<%= request.getAttribute("acceptFormats") != null ? request.getAttribute("acceptFormats") : "*/*" %>">
                             <label class="label">
                                 <span class="label-text-alt text-base-content/70">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Accepted formats: PDF, DOC, DOCX, TXT, ZIP, RAR | Max size: 10MB
+                                    Allowed formats:
+                                    <%
+                                        // Get allowed formats from assessment DTO
+                                        String allowedFormatsStr = "All formats";
+                                        String acceptFormats = "*/*";
+                                        if (assessment.getAllowedFileFormats() != null && !assessment.getAllowedFileFormats().isEmpty()) {
+                                            allowedFormatsStr = assessment.getAllowedFileFormats().stream()
+                                                .map(FileFormats::name)
+                                                .collect(java.util.stream.Collectors.joining(", "));
+                                            // Create accept attribute for file input
+                                            acceptFormats = assessment.getAllowedFileFormats().stream()
+                                                .map(f -> {
+                                                    switch(f) {
+                                                        case PDF: return ".pdf";
+                                                        case DOCX: return ".doc,.docx";
+                                                        case TXT: return ".txt";
+                                                        case ZIP: return ".zip";
+                                                        case RAR: return ".rar";
+                                                        default: return "";
+                                                    }
+                                                })
+                                                .filter(s -> !s.isEmpty())
+                                                .collect(java.util.stream.Collectors.joining(","));
+                                        }
+                                        request.setAttribute("acceptFormats", acceptFormats);
+                                        request.setAttribute("allowedFormatsDisplay", allowedFormatsStr);
+                                    %>
+                                    <strong><%= allowedFormatsStr %></strong> | Max size per file: 10MB | Multiple files allowed
                                 </span>
                             </label>
+                            <!-- Selected files preview -->
+                            <div id="fileList" class="mt-2 space-y-2"></div>
                         </div>
 
                         <!-- Comments/Notes Section -->
@@ -185,20 +216,94 @@
 </div>
 
 <script>
-    // File size validation
-    document.querySelector('input[type="file"]').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    // File upload handling with preview
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
 
-        if (file && file.size > maxSize) {
-            alert('File size exceeds 10MB. Please choose a smaller file.');
-            e.target.value = '';
+    fileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        fileList.innerHTML = '';
+
+        if (files.length === 0) {
+            return;
+        }
+
+        let hasError = false;
+        files.forEach((file, index) => {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'flex items-center justify-between p-3 bg-base-200 rounded-lg';
+
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'flex items-center gap-3';
+
+            // File icon
+            const icon = document.createElement('svg');
+            icon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            icon.className = 'h-6 w-6 text-primary';
+            icon.setAttribute('fill', 'none');
+            icon.setAttribute('viewBox', '0 0 24 24');
+            icon.setAttribute('stroke', 'currentColor');
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />';
+
+            const textDiv = document.createElement('div');
+            const fileName = document.createElement('div');
+            fileName.className = 'font-semibold text-sm';
+            fileName.textContent = file.name;
+
+            const fileSize = document.createElement('div');
+            fileSize.className = 'text-xs text-base-content/70';
+            fileSize.textContent = formatFileSize(file.size);
+
+            // Check file size
+            if (file.size > maxSize) {
+                fileSize.className = 'text-xs text-error font-bold';
+                fileSize.textContent = 'File too large! ' + formatFileSize(file.size);
+                hasError = true;
+            }
+
+            textDiv.appendChild(fileName);
+            textDiv.appendChild(fileSize);
+            fileInfo.appendChild(icon);
+            fileInfo.appendChild(textDiv);
+            fileDiv.appendChild(fileInfo);
+
+            // Status badge
+            const badge = document.createElement('span');
+            badge.className = file.size <= maxSize ? 'badge badge-success' : 'badge badge-error';
+            badge.textContent = file.size <= maxSize ? 'Ready' : 'Too Large';
+            fileDiv.appendChild(badge);
+
+            fileList.appendChild(fileDiv);
+        });
+
+        if (hasError) {
+            alert('Some files exceed the 10MB size limit. Please remove or replace them before submitting.');
         }
     });
 
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
     // Confirm before submission
     document.querySelector('form').addEventListener('submit', function(e) {
-        if (!confirm('Are you sure you want to submit this assignment? You will not be able to edit it after submission.')) {
+        const files = fileInput.files;
+
+        // Check if any file exceeds size limit
+        for (let file of files) {
+            if (file.size > maxSize) {
+                alert('Please remove files that exceed the 10MB size limit before submitting.');
+                e.preventDefault();
+                return;
+            }
+        }
+
+        if (!confirm('Are you sure you want to submit this assignment with ' + files.length + ' file(s)? You will not be able to edit it after submission.')) {
             e.preventDefault();
         }
     });

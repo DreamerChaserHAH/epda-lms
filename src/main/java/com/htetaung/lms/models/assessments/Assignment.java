@@ -21,7 +21,7 @@ public class Assignment extends Assessment{
     @Column(name="number_of_files", nullable = false)
     private int number_of_files;
 
-    @ElementCollection(targetClass = FileFormats.class)
+    @ElementCollection(targetClass = FileFormats.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "assignment_allowed_formats",
             joinColumns = @JoinColumn(name = "assignment_id")
