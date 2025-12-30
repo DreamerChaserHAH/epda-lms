@@ -131,6 +131,10 @@ public class AssessmentServiceFacade {
         return assessmentFacade.findAssessmentsInClass(classId);
     }
 
+    public List<AssessmentDTO> ListVisibleAssessmentsForStudent(Long classId, Long studentId) throws AssessmentException {
+        return assessmentFacade.findVisibleAssessmentsForStudent(classId, studentId);
+    }
+
     public void UpdateAssessmentDetails(AssessmentDTO dto, Long classId, Long lecturerId, String operatedBy) throws AssessmentException {
         if (!assessmentFacade.assessmentExists(dto.getAssessmentId())) {
             throw new AssessmentException("Assessment not found");

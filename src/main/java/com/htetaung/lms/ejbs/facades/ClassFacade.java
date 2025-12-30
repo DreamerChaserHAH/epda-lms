@@ -41,4 +41,10 @@ public class ClassFacade extends AbstractFacade<Class>{
                 .setParameter("moduleId", moduleId)
                 .getResultList();
     }
+
+    public List<Class> listAllClassesUnderStudent(Long studentId){
+        return em.createQuery("SELECT c FROM Class c JOIN c.enrolledStudents s WHERE s.userId = :studentId", Class.class)
+                .setParameter("studentId", studentId)
+                .getResultList();
+    }
 }

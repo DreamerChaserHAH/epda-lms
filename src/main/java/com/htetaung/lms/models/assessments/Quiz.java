@@ -25,9 +25,9 @@ public class Quiz extends Assessment {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "QuizIndividualQuestion",
-            joinColumns = @JoinColumn(name = "quiz_id"),
-            inverseJoinColumns = @JoinColumn(name = "question_id")
+            name = "quiz_questions",
+            joinColumns = @JoinColumn(name = "assessment_id"),
+            inverseJoinColumns = @JoinColumn(name = "quiz_question_id")
     )
     private List<QuizIndividualQuestion> questions = new ArrayList<>();
 

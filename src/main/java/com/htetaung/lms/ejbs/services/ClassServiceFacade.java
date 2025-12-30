@@ -76,7 +76,7 @@ public class ClassServiceFacade {
 
     public List<ClassDTO> ListAllClassesUnderLecturer(Long lecturerId) throws ClassException {
         List<Module> modules = moduleFacade.listAllModulesUnderLecturer(lecturerId, 1);
-        if (modules.isEmpty()) {
+        if (modules == null) {
             throw new ClassException("No modules found under this lecturer");
         }
 
@@ -102,11 +102,29 @@ public class ClassServiceFacade {
             }
         }
 
-        if (allClasses.isEmpty()) {
+        if (allClasses == null) {
             throw new ClassException("No classes found under this lecturer");
         }
 
         return allClasses;
+    }
+
+    public List<ClassDTO> ListAllClassesUnderStudent(Long studentId) throws ClassException {
+        List<Class> classes = classFacade.listAllClassesUnderStudent(studentId);
+
+        if (classes == null) {
+            throw new ClassException("No classes found for this student");
+        }
+
+        return classes.stream().map(
+                classInQuestion -> {
+                    try {
+                        return GetClass(classInQuestion.getClassId());
+                    } catch (ClassException | ModuleException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        ).toList();
     }
 
 

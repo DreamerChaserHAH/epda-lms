@@ -2,6 +2,7 @@ package com.htetaung.lms.ejbs.facades;
 
 import com.htetaung.lms.models.Class;
 import com.htetaung.lms.models.Staff;
+import com.htetaung.lms.models.Student;
 import com.htetaung.lms.models.User;
 import com.htetaung.lms.exception.AuthenticationException;
 import com.htetaung.lms.models.assessments.Assessment;
@@ -22,6 +23,9 @@ public class AssessmentFacade extends AbstractFacade<Assessment>{
 
     @PersistenceContext
     private EntityManager em;
+
+    @EJB
+    private StudentFacade studentFacade;
 
     public static final int PAGE_SIZE = 10;
 
@@ -45,6 +49,29 @@ public class AssessmentFacade extends AbstractFacade<Assessment>{
     public List<AssessmentDTO> findAssessmentsInClass(Long classId){
         List<Assessment> assessments = em.createQuery("SELECT a FROM Assessment a WHERE a.relatedClass.classId = :classId", Assessment.class)
                 .setParameter("classId", classId)
+                .getResultList();
+        return assessments.stream().map(AssessmentDTO::new).toList();
+    }
+
+    public List<AssessmentDTO> findVisibleAssessmentsForStudent(Long classId, Long studentId) {
+        // Get the Student entity first
+        Student student = studentFacade.find(studentId);
+        if (student == null) {
+            return List.of(); // Return empty list if student not found
+        }
+
+        // Get assessments that are:
+        // 1. PUBLIC - visible to all
+        // 2. PROTECTED - student is in visibleToStudents list
+        // 3. Belong to the specified class
+        List<Assessment> assessments = em.createQuery(
+                "SELECT a FROM Assessment a " +
+                "WHERE a.relatedClass.classId = :classId " +
+                "AND (a.visibility = 'PUBLIC' " +
+                "OR (a.visibility = 'PROTECTED' AND :student MEMBER OF a.visibleToStudents))",
+                Assessment.class)
+                .setParameter("classId", classId)
+                .setParameter("student", student)
                 .getResultList();
         return assessments.stream().map(AssessmentDTO::new).toList();
     }

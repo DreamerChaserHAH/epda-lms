@@ -58,6 +58,7 @@ public class AssessmentServlet extends HttpServlet {
 
         // GET list of assessments (with optional class filter)
         String classIdString = RequestParameterProcessor.getStringValue("classId", request, "");
+        String studentIdString = RequestParameterProcessor.getStringValue("studentId", request, "");
         String pagination_string = RequestParameterProcessor.getStringValue("pagination", request, "1");
 
         int pagination = Integer.parseInt(pagination_string);
@@ -67,7 +68,14 @@ public class AssessmentServlet extends HttpServlet {
 
             if (classIdString != null && !classIdString.isEmpty()) {
                 Long classId = Long.parseLong(classIdString);
-                assessments = assessmentServiceFacade.ListAllAssessmentsInClass(classId);
+
+                // If studentId is provided, filter assessments based on visibility
+                if (studentIdString != null && !studentIdString.isEmpty()) {
+                    Long studentId = Long.parseLong(studentIdString);
+                    assessments = assessmentServiceFacade.ListVisibleAssessmentsForStudent(classId, studentId);
+                } else {
+                    assessments = assessmentServiceFacade.ListAllAssessmentsInClass(classId);
+                }
             } else {
                 assessments = assessmentServiceFacade.ListAllAssessments();
             }

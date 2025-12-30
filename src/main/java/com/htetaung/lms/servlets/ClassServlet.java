@@ -82,6 +82,9 @@ public class ClassServlet extends HttpServlet {
             // Check for lecturerId parameter (NEW - for listing classes under lecturer)
             String lecturerId_String = RequestParameterProcessor.getStringValue("lecturerId", request, null);
 
+            // Check for studentId parameter (NEW - for listing classes under student)
+            String studentId_String = RequestParameterProcessor.getStringValue("studentId", request, null);
+
             if (lecturerId_String != null && !lecturerId_String.isEmpty()) {
                 try {
                     Long lecturerId = Long.parseLong(lecturerId_String);
@@ -94,6 +97,22 @@ public class ClassServlet extends HttpServlet {
                 } catch (NumberFormatException e) {
                     request.getSession().setAttribute("messageType", "ERROR");
                     request.getSession().setAttribute("messageContent", "Invalid Lecturer ID format");
+                } catch (ClassException e) {
+                    request.getSession().setAttribute("messageType", "ERROR");
+                    request.getSession().setAttribute("messageContent", "Exception: " + e.getMessage());
+                }
+            } else if (studentId_String != null && !studentId_String.isEmpty()) {
+                try {
+                    Long studentId = Long.parseLong(studentId_String);
+                    List<ClassDTO> classes = classServiceFacade.ListAllClassesUnderStudent(studentId);
+                    request.setAttribute("classes", classes);
+
+                    request.getSession().setAttribute("messageType", "SUCCESS");
+                    request.getSession().setAttribute("messageContent", "Classes loaded successfully!");
+
+                } catch (NumberFormatException e) {
+                    request.getSession().setAttribute("messageType", "ERROR");
+                    request.getSession().setAttribute("messageContent", "Invalid Student ID format");
                 } catch (ClassException e) {
                     request.getSession().setAttribute("messageType", "ERROR");
                     request.getSession().setAttribute("messageContent", "Exception: " + e.getMessage());
